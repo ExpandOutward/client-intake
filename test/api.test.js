@@ -112,7 +112,7 @@ describe("intake API", { concurrency: false }, () => {
     const home = await fetch(`${ctx.url}/`);
     assert.equal(home.status, 200);
     const html = await home.text();
-    assert.match(html, /Northline Construction/);
+    assert.match(html, /Construction Business/);
     assert.match(html, /Request a site visit/);
 
     const health = await fetch(`${ctx.url}/health`);
