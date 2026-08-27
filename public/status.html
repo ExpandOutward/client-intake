@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project status | Northline Construction</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"><span></span><span></span></span>
+      <div>
+        <p class="brand-name">Northline Construction</p>
+        <p class="brand-tag">Office build-outs &amp; renovations</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p class="eyebrow">Project status</p>
+
+    <p id="status-loading">Loading your project…</p>
+
+    <section id="status-error" hidden>
+      <h1>Project not found</h1>
+      <p id="status-error-text">This link may be incomplete or no longer valid.</p>
+      <p><a href="/">Request a site visit</a></p>
+    </section>
+
+    <article id="status-view" hidden>
+      <h1>Your project</h1>
+      <p class="status-pill" id="status-pill"></p>
+      <dl class="facts">
+        <div>
+          <dt>Contact</dt>
+          <dd id="field-name"></dd>
+        </div>
+        <div>
+          <dt>Email</dt>
+          <dd id="field-email"></dd>
+        </div>
+        <div>
+          <dt>Business</dt>
+          <dd id="field-company"></dd>
+        </div>
+        <div>
+          <dt>Jobsite</dt>
+          <dd id="field-site"></dd>
+        </div>
+        <div>
+          <dt>Work type</dt>
+          <dd id="field-project-type"></dd>
+        </div>
+        <div>
+          <dt>Space size</dt>
+          <dd id="field-square-footage"></dd>
+        </div>
+        <div>
+          <dt>Start window</dt>
+          <dd id="field-timeline"></dd>
+        </div>
+        <div>
+          <dt>Budget</dt>
+          <dd id="field-budget"></dd>
+        </div>
+        <div>
+          <dt>Submitted</dt>
+          <dd id="field-created"></dd>
+        </div>
+      </dl>
+      <h2>About the space</h2>
+      <p id="field-message" class="message"></p>
+      <p class="hint">Keep this link. It is private to this job.</p>
+    </article>
+  </main>
+
+  <footer class="site-foot">
+    <p>Northline Construction · Licensed &amp; insured · Office projects for small businesses</p>
+  </footer>
+  <script src="status.js"></script>
+</body>
+</html>

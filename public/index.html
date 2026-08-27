@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Request a site visit | Northline Construction</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"><span></span><span></span></span>
+      <div>
+        <p class="brand-name">Northline Construction</p>
+        <p class="brand-tag">Office build-outs &amp; renovations</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <header class="page-intro" id="page-intro">
+      <p class="eyebrow">Project intake</p>
+      <h1>Request a site visit</h1>
+      <p class="lede">We build and renovate offices for small businesses. Tell us about the space and we will follow up to walk the job. You will get a private link to track status.</p>
+    </header>
+
+    <form id="intake-form" novalidate>
+      <div class="field-grid">
+        <label>
+          Your name
+          <input type="text" name="name" required autocomplete="name" maxlength="120" />
+        </label>
+
+        <label>
+          Work email
+          <input type="email" name="email" required autocomplete="email" maxlength="254" />
+        </label>
+
+        <label>
+          Business name
+          <input type="text" name="company" required autocomplete="organization" maxlength="120" />
+        </label>
+
+        <label>
+          Jobsite city or address
+          <input type="text" name="site" autocomplete="street-address" maxlength="200" placeholder="e.g. 1420 Mill St, Suite 200" />
+        </label>
+      </div>
+
+      <div class="field-grid">
+        <label>
+          Type of work
+          <select name="project_type" required>
+            <option value="">Select one</option>
+            <option value="new_build">New office build</option>
+            <option value="renovation">Office renovation</option>
+            <option value="fit_out">Interior fit-out</option>
+            <option value="repair">Repairs &amp; punch list</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Approximate size
+          <select name="square_footage">
+            <option value="not_sure">Not sure yet</option>
+            <option value="under_1000">Under 1,000 sq ft</option>
+            <option value="1000_3000">1,000–3,000 sq ft</option>
+            <option value="3000_8000">3,000–8,000 sq ft</option>
+            <option value="8000_plus">8,000+ sq ft</option>
+          </select>
+        </label>
+
+        <label>
+          When do you want to start?
+          <select name="timeline">
+            <option value="flexible">Flexible</option>
+            <option value="asap">As soon as possible</option>
+            <option value="1_3_months">1–3 months</option>
+            <option value="3_6_months">3–6 months</option>
+          </select>
+        </label>
+
+        <label>
+          Project budget
+          <select name="budget">
+            <option value="not_sure">Not sure yet</option>
+            <option value="under_25k">Under $25,000</option>
+            <option value="25k_75k">$25,000–75,000</option>
+            <option value="75k_150k">$75,000–150,000</option>
+            <option value="150k_plus">$150,000+</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        Tell us about the space
+        <textarea name="message" rows="6" required maxlength="5000" placeholder="Offices, meeting rooms, current condition, after-hours access…"></textarea>
+        <span class="field-hint">Include how the space is used today and what should change.</span>
+      </label>
+
+      <button type="submit" id="submit-btn">Request a site visit</button>
+      <p id="form-error" class="error" hidden role="alert"></p>
+    </form>
+
+    <section id="thanks" hidden>
+      <h2>Request received</h2>
+      <p>A project manager will review this and follow up about a site visit. Save your status link:</p>
+      <p class="status-actions">
+        <a id="status-link" href="#">Project status</a>
+        <button type="button" id="copy-link" class="secondary">Copy link</button>
+      </p>
+      <p id="copy-note" class="hint" hidden>Copied.</p>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <p>Northline Construction · Licensed &amp; insured · Office projects for small businesses</p>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>
