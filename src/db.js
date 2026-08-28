@@ -12,6 +12,7 @@ const SQLITE_SCHEMA = `
     public_id TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     email TEXT NOT NULL,
+    notify_email TEXT,
     company TEXT,
     site TEXT,
     project_type TEXT NOT NULL,
@@ -31,6 +32,7 @@ const POSTGRES_SCHEMA = `
     public_id TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     email TEXT NOT NULL,
+    notify_email TEXT,
     company TEXT,
     site TEXT,
     project_type TEXT NOT NULL,
@@ -45,7 +47,7 @@ const POSTGRES_SCHEMA = `
 `;
 
 const INSERT_SQL = `INSERT INTO requests (
-  public_id, name, email, company, site, project_type, square_footage, timeline,
+  public_id, name, email, notify_email, company, site, project_type, square_footage, timeline,
   budget, message, status, created_at, updated_at
 ) VALUES`;
 
@@ -55,6 +57,7 @@ function insertParams(fields) {
     fields.public_id,
     fields.name,
     fields.email,
+    fields.notify_email,
     fields.company,
     fields.site,
     fields.project_type,
@@ -88,6 +91,17 @@ function ensureSqliteColumn(db, name, definition) {
   }
 }
 
+async function ensurePostgresColumn(pool, name, definition) {
+  const result = await pool.query(
+    `SELECT 1 FROM information_schema.columns
+     WHERE table_name = 'requests' AND column_name = $1`,
+    [name],
+  );
+  if (result.rowCount === 0) {
+    await pool.query(`ALTER TABLE requests ADD COLUMN ${definition}`);
+  }
+}
+
 export function createSqliteStore(path) {
   if (path !== ":memory:") {
     mkdirSync(dirname(path), { recursive: true });
@@ -96,6 +110,7 @@ export function createSqliteStore(path) {
   const db = new DatabaseSync(path);
   db.exec(SQLITE_SCHEMA);
   ensureSqliteColumn(db, "site", "site TEXT");
+  ensureSqliteColumn(db, "notify_email", "notify_email TEXT");
   ensureSqliteColumn(db, "square_footage", "square_footage TEXT NOT NULL DEFAULT 'not_sure'");
   ensureSqliteColumn(db, "timeline", "timeline TEXT NOT NULL DEFAULT 'flexible'");
 
@@ -107,7 +122,7 @@ export function createSqliteStore(path) {
     async insertRequest(fields) {
       const params = insertParams(fields);
       db.prepare(
-        `${INSERT_SQL} (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received', ?, ?)`,
+        `${INSERT_SQL} (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received', ?, ?)`,
       ).run(...params);
       return this.getRequestByPublicId(fields.public_id);
     },
@@ -151,6 +166,10 @@ export async function createPostgresStore(connectionString) {
   });
 
   await pool.query(POSTGRES_SCHEMA);
+  await ensurePostgresColumn(pool, "notify_email", "notify_email TEXT");
+  await ensurePostgresColumn(pool, "site", "site TEXT");
+  await ensurePostgresColumn(pool, "square_footage", "square_footage TEXT NOT NULL DEFAULT 'not_sure'");
+  await ensurePostgresColumn(pool, "timeline", "timeline TEXT NOT NULL DEFAULT 'flexible'");
 
   return {
     kind: "postgres",
@@ -160,7 +179,7 @@ export async function createPostgresStore(connectionString) {
     async insertRequest(fields) {
       const params = insertParams(fields);
       const result = await pool.query(
-        `${INSERT_SQL} ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'received', $11, $12)
+        `${INSERT_SQL} ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'received', $12, $13)
          RETURNING *`,
         params,
       );

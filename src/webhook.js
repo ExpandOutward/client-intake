@@ -41,6 +41,7 @@ export function buildWebhookPayload({
   const payload = {
     event,
     occurred_at: occurredAt,
+    notify_email: row.notify_email || null,
     request: {
       ...row,
       status_url: `${publicBaseUrl}/status.html?r=${encodeURIComponent(row.id)}`,

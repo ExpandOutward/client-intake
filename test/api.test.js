@@ -29,6 +29,7 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(ctx.events.length, 1);
     assert.equal(ctx.events[0].event, "request.created");
     assert.equal(ctx.events[0].request.email, "priya@harborbookkeeping.com");
+    assert.equal(ctx.events[0].notify_email, null);
     assert.equal(
       ctx.events[0].request.status_url,
       `http://status.test/status.html?r=${body.id}`,
@@ -64,6 +65,30 @@ describe("intake API", { concurrency: false }, () => {
     });
     assert.equal(badEmail.status, 400);
     assert.deepEqual(await badEmail.json(), { error: "Enter a valid email address." });
+  });
+
+  it("uses notify_email on the webhook, falling back to CONTACT_EMAIL", async () => {
+    ctx = await startTestApp({ contactEmail: "owner@example.com" });
+
+    const withOverride = await fetch(`${ctx.url}/api/requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...sampleInquiry,
+        notify_email: "tester@example.com",
+      }),
+    });
+    assert.equal(withOverride.status, 201);
+    assert.equal(ctx.events[0].notify_email, "tester@example.com");
+    assert.equal(ctx.events[0].request.notify_email, "tester@example.com");
+
+    const fallback = await fetch(`${ctx.url}/api/requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sampleInquiry),
+    });
+    assert.equal(fallback.status, 201);
+    assert.equal(ctx.events[1].notify_email, "owner@example.com");
   });
 
   it("returns 404 for an unknown request", async () => {

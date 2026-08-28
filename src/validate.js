@@ -19,6 +19,7 @@ export function parseCreateBody(body) {
 
   const name = asTrimmedString(body.name);
   const email = asTrimmedString(body.email).toLowerCase();
+  const notifyEmail = asTrimmedString(body.notify_email).toLowerCase();
   const company = asTrimmedString(body.company);
   const site = asTrimmedString(body.site);
   const projectType = asTrimmedString(body.project_type);
@@ -33,6 +34,10 @@ export function parseCreateBody(body) {
   if (!email) return { error: "Email is required." };
   if (email.length > 254 || !EMAIL_RE.test(email)) {
     return { error: "Enter a valid email address." };
+  }
+
+  if (notifyEmail && (notifyEmail.length > 254 || !EMAIL_RE.test(notifyEmail))) {
+    return { error: "Enter a valid notification email." };
   }
 
   if (!company) return { error: "Business name is required." };
@@ -52,6 +57,7 @@ export function parseCreateBody(body) {
     value: {
       name,
       email,
+      notify_email: notifyEmail || null,
       company,
       site: site || null,
       project_type: projectType,

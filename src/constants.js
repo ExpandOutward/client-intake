@@ -83,6 +83,7 @@ export function presentRequest(row) {
     status_label: STATUS_LABELS[row.status] ?? row.status,
     name: row.name,
     email: row.email,
+    notify_email: row.notify_email,
     company: row.company,
     site: row.site,
     project_type: row.project_type,

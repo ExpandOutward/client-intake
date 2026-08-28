@@ -96,12 +96,14 @@ When `MAKE_WEBHOOK_URL` is set, the app POSTs JSON after create and after a stat
 {
   "event": "request.created",
   "occurred_at": "2026-08-27T15:00:00.000Z",
+  "notify_email": "tester@example.com",
   "request": {
     "id": "32-char-hex-token",
     "status": "received",
     "status_label": "Received",
     "name": "Priya Shah",
     "email": "priya@harborbookkeeping.com",
+    "notify_email": "tester@example.com",
     "company": "Harbor Bookkeeping",
     "site": "1420 Mill Street, Suite 200",
     "project_type": "renovation",

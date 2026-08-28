@@ -115,9 +115,14 @@ export function createApp({
       return res.status(400).json({ error: parsed.error });
     }
 
+    const fields = { ...parsed.value };
+    if (!fields.notify_email && contactEmail) {
+      fields.notify_email = contactEmail.toLowerCase();
+    }
+
     const row = await db.insertRequest({
       public_id: randomBytes(16).toString("hex"),
-      ...parsed.value,
+      ...fields,
     });
     const presented = presentRequest(row);
 

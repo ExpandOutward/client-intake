@@ -129,6 +129,7 @@ form.addEventListener("submit", async (e) => {
   const data = Object.fromEntries(new FormData(form));
   const name = data.name.trim();
   const email = data.email.trim();
+  const notifyEmail = data.notify_email.trim();
   const company = data.company.trim();
   const site = data.site.trim();
   const projectType = data.project_type;
@@ -145,6 +146,10 @@ form.addEventListener("submit", async (e) => {
     showError("Enter a valid email address.");
     return;
   }
+  if (notifyEmail && !EMAIL_RE.test(notifyEmail)) {
+    showError("Enter a valid notification email.");
+    return;
+  }
 
   submitBtn.disabled = true;
   submitBtn.textContent = "Sending…";
@@ -156,6 +161,7 @@ form.addEventListener("submit", async (e) => {
       body: JSON.stringify({
         name,
         email,
+        notify_email: notifyEmail,
         company,
         site,
         project_type: projectType,

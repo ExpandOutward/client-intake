@@ -26,7 +26,7 @@
 
     <section id="access-panel" class="access-panel" hidden>
       <div id="access-locked">
-        <p>This is a private demo. You can look through the form below. Enter a password to fill it out and submit.</p>
+        <p>This form is password protected to avoid spam submissions.</p>
         <p id="access-contact" hidden></p>
         <form id="access-form" class="access-form">
           <label>
@@ -66,6 +66,12 @@
           <input type="text" name="site" autocomplete="street-address" maxlength="200" placeholder="e.g. 1420 Mill St, Suite 200" />
         </label>
       </div>
+
+      <label>
+        Send staff notifications to
+        <input type="email" name="notify_email" maxlength="254" autocomplete="email" />
+        <span class="field-hint">If you are testing this demo, put your email here. You will get the new-request message. Status updates still go to the work email above.</span>
+      </label>
 
       <div class="field-grid">
         <label>

@@ -70,6 +70,14 @@ function jobCard(request, statuses) {
         <dd><a href="mailto:${escapeHtml(request.email)}">${escapeHtml(request.email)}</a></dd>
       </div>
       <div>
+        <dt>Notify</dt>
+        <dd>${
+          request.notify_email
+            ? `<a href="mailto:${escapeHtml(request.notify_email)}">${escapeHtml(request.notify_email)}</a>`
+            : "—"
+        }</dd>
+      </div>
+      <div>
         <dt>Size</dt>
         <dd>${escapeHtml(request.square_footage_label)}</dd>
       </div>
