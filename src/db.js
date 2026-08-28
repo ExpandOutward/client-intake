@@ -144,6 +144,10 @@ export function createSqliteStore(path) {
       ).run(status, now, publicId);
       return this.getRequestByPublicId(publicId);
     },
+    async deleteRequest(publicId) {
+      const result = db.prepare("DELETE FROM requests WHERE public_id = ?").run(publicId);
+      return result.changes > 0;
+    },
     async close() {
       db.close();
     },
@@ -205,6 +209,13 @@ export async function createPostgresStore(connectionString) {
         [status, now, publicId],
       );
       return normalizeRow(result.rows[0] ?? null);
+    },
+    async deleteRequest(publicId) {
+      const result = await pool.query(
+        "DELETE FROM requests WHERE public_id = $1",
+        [publicId],
+      );
+      return result.rowCount > 0;
     },
     async close() {
       await pool.end();

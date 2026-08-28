@@ -208,6 +208,22 @@ export function createApp({
     return res.json(presented);
   });
 
+  app.delete("/api/requests/:id", async (req, res) => {
+    if (!adminConfigured()) {
+      return res.status(503).json({ error: "Admin access is not configured." });
+    }
+    if (!hasAdmin(req)) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    const deleted = await db.deleteRequest(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Request not found." });
+    }
+
+    return res.json({ ok: true });
+  });
+
   app.use("/api", (_req, res) => {
     res.status(404).json({ error: "Not found." });
   });

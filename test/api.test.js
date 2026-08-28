@@ -175,6 +175,28 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(updateEvent.notify_email, "tester@example.com");
   });
 
+  it("deletes a request with the admin password", async () => {
+    ctx = await startTestApp();
+    const created = await fetch(`${ctx.url}/api/requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sampleInquiry),
+    });
+    const { id } = await created.json();
+
+    const denied = await fetch(`${ctx.url}/api/requests/${id}`, { method: "DELETE" });
+    assert.equal(denied.status, 401);
+
+    const removed = await fetch(`${ctx.url}/api/requests/${id}`, {
+      method: "DELETE",
+      headers: { "X-Admin-Key": "test-admin-key" },
+    });
+    assert.equal(removed.status, 200);
+
+    const missing = await fetch(`${ctx.url}/api/requests/${id}`);
+    assert.equal(missing.status, 404);
+  });
+
   it("blocks public submissions when a site password is set", async () => {
     ctx = await startTestApp({ sitePassword: "demo-pass" });
 

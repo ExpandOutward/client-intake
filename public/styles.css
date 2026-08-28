@@ -298,6 +298,24 @@ button.secondary:hover:not(:disabled) {
   background: var(--pill-bg);
 }
 
+button.danger {
+  background: transparent;
+  color: var(--error);
+  border: 1px solid var(--line);
+}
+
+button.danger:hover:not(:disabled) {
+  background: #f8e4e0;
+}
+
+.job-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
 button.text-btn {
   display: inline;
   min-height: 0;

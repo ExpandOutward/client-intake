@@ -96,7 +96,10 @@ function jobCard(request, statuses) {
     </dl>
     <h3>About the space</h3>
     <p class="message">${escapeHtml(request.message)}</p>
-    <p><a href="/status.html?r=${encodeURIComponent(request.id)}" target="_blank" rel="noreferrer">Client status page</a></p>
+    <div class="job-actions">
+      <a href="/status.html?r=${encodeURIComponent(request.id)}" target="_blank" rel="noreferrer">Client status page</a>
+      <button type="button" class="danger" data-delete="${request.id}">Remove</button>
+    </div>
   `;
   return article;
 }
@@ -171,7 +174,7 @@ loginForm.addEventListener("submit", async (event) => {
   loginError.hidden = true;
   const key = new FormData(loginForm).get("key").trim();
   if (!key) {
-    loginError.textContent = "Enter the admin key.";
+    loginError.textContent = "Enter the password.";
     loginError.hidden = false;
     return;
   }
@@ -183,6 +186,39 @@ loginForm.addEventListener("submit", async (event) => {
 signOutBtn.addEventListener("click", () => {
   clearKey();
   showLoggedOut();
+});
+
+jobList.addEventListener("click", async (event) => {
+  const button = event.target.closest("button[data-delete]");
+  if (!button) return;
+
+  const id = button.getAttribute("data-delete");
+  const company = button.closest(".job-card")?.querySelector("h2")?.textContent || "this job";
+  if (!window.confirm(`Remove ${company}? The client's status link will stop working.`)) {
+    return;
+  }
+
+  const key = getKey();
+  button.disabled = true;
+  showNote("");
+
+  try {
+    const response = await fetch(`/api/requests/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: { "X-Admin-Key": key },
+    });
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      showNote(body?.error || "Could not remove this job.");
+      button.disabled = false;
+      return;
+    }
+    showNote("Job removed.");
+    await loadBoard(key);
+  } catch {
+    showNote("Could not remove this job.");
+    button.disabled = false;
+  }
 });
 
 jobList.addEventListener("change", async (event) => {

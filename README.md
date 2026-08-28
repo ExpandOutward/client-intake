@@ -82,6 +82,12 @@ Header: `X-Admin-Key: $ADMIN_KEY`
 
 Allowed statuses: `received`, `reviewing`, `quoted`, `accepted`, `declined`, `in_progress`, `completed`.
 
+### `DELETE /api/requests/:id`
+
+Header: `X-Admin-Key: $ADMIN_KEY` or the demo `SITE_PASSWORD`.
+
+Removes the job. The public status link then returns not found.
+
 ### `GET /health`
 
 Render-style health check: `{ "ok": true }`.
