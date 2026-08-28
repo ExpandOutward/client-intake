@@ -2,6 +2,8 @@ const KEY_STORAGE = "admin-key";
 
 const loginForm = document.getElementById("login-form");
 const loginError = document.getElementById("login-error");
+const adminActions = document.getElementById("admin-actions");
+const resetDemoBtn = document.getElementById("reset-demo");
 const signOutBtn = document.getElementById("sign-out");
 const jobList = document.getElementById("job-list");
 const boardEmpty = document.getElementById("board-empty");
@@ -122,7 +124,7 @@ async function fetchJobs(key) {
 
 function showLoggedOut() {
   loginForm.hidden = false;
-  signOutBtn.hidden = true;
+  adminActions.hidden = true;
   jobList.hidden = true;
   jobList.innerHTML = "";
   boardEmpty.hidden = true;
@@ -132,7 +134,7 @@ function showLoggedOut() {
 
 function showLoggedIn() {
   loginForm.hidden = true;
-  signOutBtn.hidden = false;
+  adminActions.hidden = false;
 }
 
 async function loadBoard(key) {
@@ -186,6 +188,38 @@ loginForm.addEventListener("submit", async (event) => {
 signOutBtn.addEventListener("click", () => {
   clearKey();
   showLoggedOut();
+});
+
+resetDemoBtn.addEventListener("click", async () => {
+  if (
+    !window.confirm(
+      "Reset the demo? All current jobs will be replaced with the two sample records. No emails will be sent.",
+    )
+  ) {
+    return;
+  }
+
+  const key = getKey();
+  resetDemoBtn.disabled = true;
+  showNote("");
+
+  try {
+    const response = await fetch("/api/admin/reset", {
+      method: "POST",
+      headers: { "X-Admin-Key": key },
+    });
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      showNote(body?.error || "Could not reset the demo.");
+      return;
+    }
+    showNote("Demo reset. Two sample jobs are loaded. No emails were sent.");
+    await loadBoard(key);
+  } catch {
+    showNote("Could not reset the demo.");
+  } finally {
+    resetDemoBtn.disabled = false;
+  }
 });
 
 jobList.addEventListener("click", async (event) => {

@@ -88,6 +88,10 @@ Header: `X-Admin-Key: $ADMIN_KEY` or the demo `SITE_PASSWORD`.
 
 Removes the job. The public status link then returns not found.
 
+### `POST /api/admin/reset`
+
+Header: `X-Admin-Key`. Deletes every job and inserts the two sample demo records. Does **not** call Make.com.
+
 ### `GET /health`
 
 Render-style health check: `{ "ok": true }`.

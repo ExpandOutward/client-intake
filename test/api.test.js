@@ -197,6 +197,36 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(missing.status, 404);
   });
 
+  it("resets the demo to two sample jobs without sending webhooks", async () => {
+    ctx = await startTestApp();
+    await fetch(`${ctx.url}/api/requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sampleInquiry),
+    });
+    assert.equal(ctx.events.length, 1);
+
+    const denied = await fetch(`${ctx.url}/api/admin/reset`, { method: "POST" });
+    assert.equal(denied.status, 401);
+
+    const reset = await fetch(`${ctx.url}/api/admin/reset`, {
+      method: "POST",
+      headers: { "X-Admin-Key": "test-admin-key" },
+    });
+    assert.equal(reset.status, 200);
+    const body = await reset.json();
+    assert.equal(body.requests.length, 2);
+    assert.equal(body.requests[0].company, "COMPANY 1 LLC");
+    assert.equal(body.requests[0].name, "Company Guy Sr.");
+    assert.equal(body.requests[0].email, "company.guy1@noreply.com");
+    assert.equal(body.requests[0].site, "123 Main Street, Pittsburgh, PA 15222");
+    assert.equal(body.requests[0].message, "Sample Data 1");
+    assert.equal(body.requests[1].company, "COMPANY 2 LLC");
+    assert.equal(body.requests[1].name, "Company Guy Jr.");
+    assert.equal(body.requests[1].site, "1 Main Road, Pittsburgh, PA 15222");
+    assert.equal(ctx.events.length, 1);
+  });
+
   it("blocks public submissions when a site password is set", async () => {
     ctx = await startTestApp({ sitePassword: "demo-pass" });
 

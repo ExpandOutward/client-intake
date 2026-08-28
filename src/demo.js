@@ -1,0 +1,26 @@
+export const DEMO_JOBS = [
+  {
+    name: "Company Guy Sr.",
+    email: "company.guy1@noreply.com",
+    notify_email: null,
+    company: "COMPANY 1 LLC",
+    site: "123 Main Street, Pittsburgh, PA 15222",
+    project_type: "renovation",
+    square_footage: "under_1000",
+    timeline: "flexible",
+    budget: "25k_75k",
+    message: "Sample Data 1",
+  },
+  {
+    name: "Company Guy Jr.",
+    email: "company.guy2@noreply.com",
+    notify_email: null,
+    company: "COMPANY 2 LLC",
+    site: "1 Main Road, Pittsburgh, PA 15222",
+    project_type: "renovation",
+    square_footage: "under_1000",
+    timeline: "flexible",
+    budget: "25k_75k",
+    message: "Sample Data 1",
+  },
+];

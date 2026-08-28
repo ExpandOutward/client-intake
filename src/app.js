@@ -16,6 +16,7 @@ import {
   STATUS_LABELS,
   statusUrl,
 } from "./constants.js";
+import { DEMO_JOBS } from "./demo.js";
 import { parseCreateBody, parseStatusBody } from "./validate.js";
 import { buildWebhookPayload } from "./webhook.js";
 
@@ -222,6 +223,29 @@ export function createApp({
     }
 
     return res.json({ ok: true });
+  });
+
+  app.post("/api/admin/reset", async (req, res) => {
+    if (!adminConfigured()) {
+      return res.status(503).json({ error: "Admin access is not configured." });
+    }
+    if (!hasAdmin(req)) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    await db.deleteAllRequests();
+    for (const job of DEMO_JOBS) {
+      await db.insertRequest({
+        public_id: randomBytes(16).toString("hex"),
+        ...job,
+      });
+    }
+
+    const rows = await db.listRequests();
+    return res.json({
+      statuses: statusOptions(),
+      requests: rows.map(presentRequest),
+    });
   });
 
   app.use("/api", (_req, res) => {

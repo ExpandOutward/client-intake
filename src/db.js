@@ -133,7 +133,7 @@ export function createSqliteStore(path) {
     },
     async listRequests() {
       return db
-        .prepare("SELECT * FROM requests ORDER BY created_at DESC")
+        .prepare("SELECT * FROM requests ORDER BY created_at DESC, id ASC")
         .all()
         .map(normalizeRow);
     },
@@ -147,6 +147,9 @@ export function createSqliteStore(path) {
     async deleteRequest(publicId) {
       const result = db.prepare("DELETE FROM requests WHERE public_id = ?").run(publicId);
       return result.changes > 0;
+    },
+    async deleteAllRequests() {
+      db.exec("DELETE FROM requests");
     },
     async close() {
       db.close();
@@ -198,7 +201,7 @@ export async function createPostgresStore(connectionString) {
     },
     async listRequests() {
       const result = await pool.query(
-        "SELECT * FROM requests ORDER BY created_at DESC",
+        "SELECT * FROM requests ORDER BY created_at DESC, id ASC",
       );
       return result.rows.map(normalizeRow);
     },
@@ -216,6 +219,9 @@ export async function createPostgresStore(connectionString) {
         [publicId],
       );
       return result.rowCount > 0;
+    },
+    async deleteAllRequests() {
+      await pool.query("DELETE FROM requests");
     },
     async close() {
       await pool.end();
