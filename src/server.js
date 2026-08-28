@@ -15,6 +15,8 @@ const publicBaseUrl = (
   `http://localhost:${port}`
 ).replace(/\/$/, "");
 const adminKey = process.env.ADMIN_KEY || "";
+const sitePassword = process.env.SITE_PASSWORD || "";
+const contactEmail = process.env.CONTACT_EMAIL || "";
 const webhookUrl = process.env.MAKE_WEBHOOK_URL || "";
 const databaseUrl = process.env.DATABASE_URL || "";
 const sqlitePath = process.env.DATABASE_PATH || join(root, "data", "intake.db");
@@ -29,6 +31,8 @@ const app = createApp({
   publicDir: join(root, "public"),
   publicBaseUrl,
   adminKey,
+  sitePassword,
+  contactEmail,
   sendWebhook: (payload) => sendWebhook({ webhookUrl, payload }),
 });
 
@@ -42,5 +46,10 @@ app.listen(port, () => {
   }
   if (!adminKey) {
     console.log("ADMIN_KEY not set; PATCH /api/requests/:id is disabled");
+  }
+  if (sitePassword) {
+    console.log("Site login enabled");
+  } else {
+    console.log("SITE_PASSWORD not set; intake is public");
   }
 });

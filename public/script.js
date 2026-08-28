@@ -6,6 +6,13 @@ const statusLink = document.getElementById("status-link");
 const submitBtn = document.getElementById("submit-btn");
 const copyBtn = document.getElementById("copy-link");
 const copyNote = document.getElementById("copy-note");
+const accessGate = document.getElementById("access-gate");
+const accessForm = document.getElementById("access-form");
+const accessError = document.getElementById("access-error");
+const accessBtn = document.getElementById("access-btn");
+const accessContact = document.getElementById("access-contact");
+const accessBar = document.getElementById("access-bar");
+const accessSignOut = document.getElementById("access-sign-out");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SUBMIT_LABEL = "Request a site visit";
@@ -14,6 +21,83 @@ function showError(message) {
   errorEl.textContent = message;
   errorEl.hidden = false;
 }
+
+function showIntake() {
+  accessGate.hidden = true;
+  pageIntro.hidden = false;
+  form.hidden = false;
+}
+
+function showAccessGate(contactEmail) {
+  form.hidden = true;
+  pageIntro.hidden = true;
+  thanks.hidden = true;
+  accessBar.hidden = true;
+  accessGate.hidden = false;
+  if (contactEmail) {
+    accessContact.replaceChildren();
+    accessContact.append("Email ");
+    const link = document.createElement("a");
+    link.href = `mailto:${contactEmail}?subject=${encodeURIComponent("Demo access for the intake app")}`;
+    link.textContent = contactEmail;
+    accessContact.append(link);
+    accessContact.append(" and I will send a login.");
+    accessContact.hidden = false;
+  } else {
+    accessContact.hidden = true;
+  }
+}
+
+async function loadAccessState() {
+  const config = await fetch("/api/public-config").then((res) => res.json());
+  if (!config.access_required) {
+    showIntake();
+    return;
+  }
+
+  const session = await fetch("/api/access");
+  if (session.ok) {
+    showIntake();
+    accessBar.hidden = false;
+    return;
+  }
+
+  showAccessGate(config.contact_email);
+}
+
+accessForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  accessError.hidden = true;
+  const password = new FormData(accessForm).get("password");
+  accessBtn.disabled = true;
+  try {
+    const response = await fetch("/api/access", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      accessError.textContent = body?.error || "That login is not valid.";
+      accessError.hidden = false;
+      return;
+    }
+    accessForm.reset();
+    showIntake();
+    accessBar.hidden = false;
+  } catch {
+    accessError.textContent = "Could not sign in. Try again.";
+    accessError.hidden = false;
+  } finally {
+    accessBtn.disabled = false;
+  }
+});
+
+accessSignOut.addEventListener("click", async () => {
+  await fetch("/api/access/logout", { method: "POST" });
+  const config = await fetch("/api/public-config").then((res) => res.json());
+  showAccessGate(config.contact_email);
+});
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -60,6 +144,11 @@ form.addEventListener("submit", async (e) => {
     });
 
     const body = await response.json().catch(() => null);
+    if (response.status === 401) {
+      const config = await fetch("/api/public-config").then((res) => res.json());
+      showAccessGate(config.contact_email);
+      return;
+    }
     if (!response.ok) {
       showError(body?.error || "Could not send your request. Try again.");
       return;
@@ -68,6 +157,7 @@ form.addEventListener("submit", async (e) => {
     statusLink.href = body.status_url;
     form.hidden = true;
     pageIntro.hidden = true;
+    accessBar.hidden = true;
     thanks.hidden = false;
   } catch {
     showError("Could not send your request. Try again.");
@@ -85,4 +175,8 @@ copyBtn.addEventListener("click", async () => {
     window.prompt("Copy this status link:", url);
   }
   copyNote.hidden = false;
+});
+
+loadAccessState().catch(() => {
+  showError("Could not load the form. Refresh and try again.");
 });

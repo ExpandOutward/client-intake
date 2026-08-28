@@ -107,6 +107,49 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(updateEvent.request.status, "reviewing");
   });
 
+  it("blocks public submissions when a site password is set", async () => {
+    ctx = await startTestApp({ sitePassword: "demo-pass" });
+
+    const config = await fetch(`${ctx.url}/api/public-config`);
+    assert.deepEqual(await config.json(), {
+      access_required: true,
+      contact_email: null,
+    });
+
+    const denied = await fetch(`${ctx.url}/api/requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sampleInquiry),
+    });
+    assert.equal(denied.status, 401);
+
+    const badLogin = await fetch(`${ctx.url}/api/access`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: "nope" }),
+    });
+    assert.equal(badLogin.status, 401);
+
+    const login = await fetch(`${ctx.url}/api/access`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: "demo-pass" }),
+    });
+    assert.equal(login.status, 200);
+    const cookie = login.headers.get("set-cookie")?.split(";")[0];
+    assert.ok(cookie);
+
+    const created = await fetch(`${ctx.url}/api/requests`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookie,
+      },
+      body: JSON.stringify(sampleInquiry),
+    });
+    assert.equal(created.status, 201);
+  });
+
   it("lists requests only with the admin key", async () => {
     ctx = await startTestApp();
     await fetch(`${ctx.url}/api/requests`, {

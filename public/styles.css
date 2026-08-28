@@ -251,6 +251,27 @@ button.secondary:hover:not(:disabled) {
   background: var(--pill-bg);
 }
 
+button.text-btn {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: inherit;
+}
+
+button.text-btn:hover:not(:disabled) {
+  background: none;
+  text-decoration: underline;
+}
+
+#access-bar {
+  margin: 0 0 1rem;
+}
+
 .error {
   margin: 0.85rem 0 0;
   color: var(--error);
