@@ -227,6 +227,48 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(ctx.events.length, 1);
   });
 
+  it("backs up jobs as CSV and restores without sending webhooks", async () => {
+    ctx = await startTestApp();
+    await fetch(`${ctx.url}/api/requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...sampleInquiry,
+        message: "Need offices, a lobby, and a lab.",
+      }),
+    });
+    assert.equal(ctx.events.length, 1);
+
+    const backup = await fetch(`${ctx.url}/api/admin/backup`, {
+      headers: { "X-Admin-Key": "test-admin-key" },
+    });
+    assert.equal(backup.status, 200);
+    assert.match(backup.headers.get("content-type"), /csv/);
+    const csv = await backup.text();
+    assert.match(csv, /^id,name,email,notify_email,company,site,project_type/);
+    assert.match(csv, /Harbor Bookkeeping/);
+    assert.match(csv, /Need offices, a lobby, and a lab/);
+
+    await fetch(`${ctx.url}/api/admin/reset`, {
+      method: "POST",
+      headers: { "X-Admin-Key": "test-admin-key" },
+    });
+    const restored = await fetch(`${ctx.url}/api/admin/restore`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/csv",
+        "X-Admin-Key": "test-admin-key",
+      },
+      body: csv,
+    });
+    assert.equal(restored.status, 200);
+    const body = await restored.json();
+    assert.equal(body.requests.length, 1);
+    assert.equal(body.requests[0].company, "Harbor Bookkeeping");
+    assert.equal(body.requests[0].message, "Need offices, a lobby, and a lab.");
+    assert.equal(ctx.events.length, 1);
+  });
+
   it("blocks public submissions when a site password is set", async () => {
     ctx = await startTestApp({ sitePassword: "demo-pass" });
 

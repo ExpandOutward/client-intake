@@ -65,8 +65,9 @@ function insertParams(fields) {
     fields.timeline,
     fields.budget,
     fields.message,
-    now,
-    now,
+    fields.status || "received",
+    fields.created_at || now,
+    fields.updated_at || now,
   ];
 }
 
@@ -122,7 +123,7 @@ export function createSqliteStore(path) {
     async insertRequest(fields) {
       const params = insertParams(fields);
       db.prepare(
-        `${INSERT_SQL} (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'received', ?, ?)`,
+        `${INSERT_SQL} (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ).run(...params);
       return this.getRequestByPublicId(fields.public_id);
     },
@@ -186,7 +187,7 @@ export async function createPostgresStore(connectionString) {
     async insertRequest(fields) {
       const params = insertParams(fields);
       const result = await pool.query(
-        `${INSERT_SQL} ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'received', $12, $13)
+        `${INSERT_SQL} ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
          RETURNING *`,
         params,
       );

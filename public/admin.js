@@ -3,6 +3,9 @@ const KEY_STORAGE = "admin-key";
 const loginForm = document.getElementById("login-form");
 const loginError = document.getElementById("login-error");
 const adminActions = document.getElementById("admin-actions");
+const backupBtn = document.getElementById("backup-jobs");
+const restoreBtn = document.getElementById("restore-jobs");
+const restoreFile = document.getElementById("restore-file");
 const resetDemoBtn = document.getElementById("reset-demo");
 const signOutBtn = document.getElementById("sign-out");
 const jobList = document.getElementById("job-list");
@@ -188,6 +191,80 @@ loginForm.addEventListener("submit", async (event) => {
 signOutBtn.addEventListener("click", () => {
   clearKey();
   showLoggedOut();
+});
+
+backupBtn.addEventListener("click", async () => {
+  const key = getKey();
+  backupBtn.disabled = true;
+  showNote("");
+  try {
+    const response = await fetch("/api/admin/backup", {
+      headers: { "X-Admin-Key": key },
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      showNote(body?.error || "Could not create a backup.");
+      return;
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const day = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.download = `jobs-backup-${day}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showNote("Backup downloaded.");
+  } catch {
+    showNote("Could not create a backup.");
+  } finally {
+    backupBtn.disabled = false;
+  }
+});
+
+restoreBtn.addEventListener("click", () => {
+  restoreFile.click();
+});
+
+restoreFile.addEventListener("change", async () => {
+  const file = restoreFile.files?.[0];
+  restoreFile.value = "";
+  if (!file) return;
+
+  if (
+    !window.confirm(
+      "Restore from this file? All data will be overwritten. This cannot be undone, and no emails will be sent.",
+    )
+  ) {
+    return;
+  }
+
+  const key = getKey();
+  restoreBtn.disabled = true;
+  showNote("");
+
+  try {
+    const csv = await file.text();
+    const response = await fetch("/api/admin/restore", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/csv",
+        "X-Admin-Key": key,
+      },
+      body: csv,
+    });
+    const body = await response.json().catch(() => null);
+    if (!response.ok) {
+      showNote(body?.error || "Could not restore from this file.");
+      return;
+    }
+    showNote("Restore complete. All jobs were replaced from the backup. No emails were sent.");
+    await loadBoard(key);
+  } catch {
+    showNote("Could not restore from this file.");
+  } finally {
+    restoreBtn.disabled = false;
+  }
 });
 
 resetDemoBtn.addEventListener("click", async () => {

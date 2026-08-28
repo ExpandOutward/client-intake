@@ -16,8 +16,9 @@ import {
   STATUS_LABELS,
   statusUrl,
 } from "./constants.js";
+import { csvRowsToObjects, parseCsv, toCsv } from "./csv.js";
 import { DEMO_JOBS } from "./demo.js";
-import { parseCreateBody, parseStatusBody } from "./validate.js";
+import { parseCreateBody, parseRestoreRow, parseStatusBody } from "./validate.js";
 import { buildWebhookPayload } from "./webhook.js";
 
 function fireWebhook(sendWebhook, payload) {
@@ -247,6 +248,65 @@ export function createApp({
       requests: rows.map(presentRequest),
     });
   });
+
+  app.get("/api/admin/backup", async (req, res) => {
+    if (!adminConfigured()) {
+      return res.status(503).json({ error: "Admin access is not configured." });
+    }
+    if (!hasAdmin(req)) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    const rows = await db.listRequests();
+    const csv = toCsv(rows.map(presentRequest));
+    const day = new Date().toISOString().slice(0, 10);
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="jobs-backup-${day}.csv"`);
+    return res.send(csv);
+  });
+
+  app.post(
+    "/api/admin/restore",
+    express.text({ type: ["text/csv", "text/plain"], limit: "512kb" }),
+    async (req, res) => {
+      if (!adminConfigured()) {
+        return res.status(503).json({ error: "Admin access is not configured." });
+      }
+      if (!hasAdmin(req)) {
+        return res.status(401).json({ error: "Unauthorized." });
+      }
+
+      const parsedCsv = csvRowsToObjects(parseCsv(req.body));
+      if (parsedCsv.error) {
+        return res.status(400).json({ error: parsedCsv.error });
+      }
+
+      const jobs = [];
+      const ids = new Set();
+      for (let i = 0; i < parsedCsv.value.length; i += 1) {
+        const parsed = parseRestoreRow(parsedCsv.value[i], i + 2);
+        if (parsed.error) {
+          return res.status(400).json({ error: parsed.error });
+        }
+        if (ids.has(parsed.value.public_id)) {
+          return res.status(400).json({ error: "CSV contains duplicate job ids." });
+        }
+        ids.add(parsed.value.public_id);
+        jobs.push(parsed.value);
+      }
+
+      await db.deleteAllRequests();
+      for (const job of jobs) {
+        await db.insertRequest(job);
+      }
+
+      const rows = await db.listRequests();
+      return res.json({
+        statuses: statusOptions(),
+        requests: rows.map(presentRequest),
+      });
+    },
+  );
 
   app.use("/api", (_req, res) => {
     res.status(404).json({ error: "Not found." });

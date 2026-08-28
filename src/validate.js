@@ -81,3 +81,39 @@ export function parseStatusBody(body) {
 
   return { value: { status } };
 }
+
+export function parseRestoreRow(body, index) {
+  const created = parseCreateBody(body);
+  if (created.error) {
+    return { error: `Row ${index}: ${created.error}` };
+  }
+
+  const id = asTrimmedString(body.id);
+  if (!/^[a-f0-9]{32}$/i.test(id)) {
+    return { error: `Row ${index}: Each job needs a 32-character id.` };
+  }
+
+  const status = asTrimmedString(body.status) || "received";
+  if (!STATUSES.includes(status)) {
+    return { error: `Row ${index}: Select a valid status.` };
+  }
+
+  const createdAt = asTrimmedString(body.created_at);
+  const updatedAt = asTrimmedString(body.updated_at);
+  if (createdAt && Number.isNaN(new Date(createdAt).getTime())) {
+    return { error: `Row ${index}: created_at is not a valid date.` };
+  }
+  if (updatedAt && Number.isNaN(new Date(updatedAt).getTime())) {
+    return { error: `Row ${index}: updated_at is not a valid date.` };
+  }
+
+  return {
+    value: {
+      public_id: id.toLowerCase(),
+      ...created.value,
+      status,
+      created_at: createdAt || undefined,
+      updated_at: updatedAt || undefined,
+    },
+  };
+}
