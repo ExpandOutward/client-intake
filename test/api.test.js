@@ -107,6 +107,27 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(updateEvent.request.status, "reviewing");
   });
 
+  it("lists requests only with the admin key", async () => {
+    ctx = await startTestApp();
+    await fetch(`${ctx.url}/api/requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sampleInquiry),
+    });
+
+    const denied = await fetch(`${ctx.url}/api/admin/requests`);
+    assert.equal(denied.status, 401);
+
+    const listed = await fetch(`${ctx.url}/api/admin/requests`, {
+      headers: { "X-Admin-Key": "test-admin-key" },
+    });
+    assert.equal(listed.status, 200);
+    const body = await listed.json();
+    assert.equal(body.requests.length, 1);
+    assert.equal(body.requests[0].company, "Harbor Bookkeeping");
+    assert.ok(body.statuses.some((status) => status.value === "reviewing"));
+  });
+
   it("serves the intake page and health check", async () => {
     ctx = await startTestApp();
     const home = await fetch(`${ctx.url}/`);

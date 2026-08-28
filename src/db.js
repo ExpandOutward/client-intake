@@ -116,6 +116,12 @@ export function createSqliteStore(path) {
         db.prepare("SELECT * FROM requests WHERE public_id = ?").get(publicId) ?? null,
       );
     },
+    async listRequests() {
+      return db
+        .prepare("SELECT * FROM requests ORDER BY created_at DESC")
+        .all()
+        .map(normalizeRow);
+    },
     async updateRequestStatus(publicId, status) {
       const now = new Date().toISOString();
       db.prepare(
@@ -166,6 +172,12 @@ export async function createPostgresStore(connectionString) {
         [publicId],
       );
       return normalizeRow(result.rows[0] ?? null);
+    },
+    async listRequests() {
+      const result = await pool.query(
+        "SELECT * FROM requests ORDER BY created_at DESC",
+      );
+      return result.rows.map(normalizeRow);
     },
     async updateRequestStatus(publicId, status) {
       const now = new Date().toISOString();

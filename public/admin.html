@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jobs | Construction Business</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-bar">
+      <div class="brand">
+        <span class="mark" aria-hidden="true"><span></span><span></span></span>
+        <div>
+          <p class="brand-name">Construction Business</p>
+          <p class="brand-tag">Office build-outs &amp; renovations</p>
+        </div>
+      </div>
+      <button type="button" id="sign-out" class="secondary" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <main class="wrap wide">
+    <p class="eyebrow">Admin</p>
+    <h1>Jobs</h1>
+    <p class="lede">Review incoming requests and update status. Each change emails the client.</p>
+
+    <form id="login-form">
+      <label>
+        Admin key
+        <input type="password" name="key" required autocomplete="current-password" />
+      </label>
+      <button type="submit">Sign in</button>
+      <p id="login-error" class="error" hidden role="alert"></p>
+    </form>
+
+    <p id="board-empty" hidden>No requests yet.</p>
+    <p id="board-error" class="error" hidden role="alert"></p>
+    <p id="board-note" class="hint" hidden></p>
+    <div id="job-list" hidden></div>
+  </main>
+
+  <footer class="site-foot">
+    <p>Construction Business · Staff only</p>
+  </footer>
+  <script src="admin.js"></script>
+</body>
+</html>

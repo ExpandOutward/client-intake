@@ -1,6 +1,11 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import express from "express";
-import { presentRequest, STATUS_LABELS, statusUrl } from "./constants.js";
+import {
+  presentRequest,
+  STATUSES,
+  STATUS_LABELS,
+  statusUrl,
+} from "./constants.js";
 import { parseCreateBody, parseStatusBody } from "./validate.js";
 import { buildWebhookPayload } from "./webhook.js";
 
@@ -16,6 +21,13 @@ function fireWebhook(sendWebhook, payload) {
   void Promise.resolve(sendWebhook(payload)).catch((err) => {
     console.error(`Webhook error: ${err.message}`);
   });
+}
+
+function statusOptions() {
+  return STATUSES.map((value) => ({
+    value,
+    label: STATUS_LABELS[value],
+  }));
 }
 
 export function createApp({
@@ -65,6 +77,21 @@ export function createApp({
       status: presented.status,
       status_label: presented.status_label,
       status_url: statusUrl("", presented.id),
+    });
+  });
+
+  app.get("/api/admin/requests", async (req, res) => {
+    if (!adminKey) {
+      return res.status(503).json({ error: "Admin access is not configured." });
+    }
+    if (!adminKeyMatches(req.get("x-admin-key"), adminKey)) {
+      return res.status(401).json({ error: "Unauthorized." });
+    }
+
+    const rows = await db.listRequests();
+    return res.json({
+      statuses: statusOptions(),
+      requests: rows.map(presentRequest),
     });
   });
 

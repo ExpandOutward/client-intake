@@ -44,6 +44,16 @@ body {
   border-bottom: 4px solid var(--accent);
 }
 
+.brand-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(70rem, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 0.9rem 0;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -51,6 +61,12 @@ body {
   width: min(44rem, calc(100% - 2rem));
   margin: 0 auto;
   padding: 0.9rem 0;
+}
+
+.brand-bar .brand {
+  width: auto;
+  margin: 0;
+  padding: 0;
 }
 
 .mark {
@@ -94,6 +110,10 @@ body {
   margin: 0 auto;
   padding: 2.25rem 0 2.5rem;
   flex: 1;
+}
+
+.wrap.wide {
+  width: min(70rem, calc(100% - 2rem));
 }
 
 .page-intro {
@@ -318,8 +338,48 @@ a {
 }
 
 .site-foot p {
-  width: min(44rem, calc(100% - 2rem));
+  width: min(70rem, calc(100% - 2rem));
   margin: 0 auto;
+}
+
+.job-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  padding: 1.35rem;
+  margin-bottom: 1rem;
+}
+
+.job-card h2,
+.job-card h3 {
+  margin: 0 0 0.35rem;
+}
+
+.job-card h3 {
+  font-size: 0.95rem;
+}
+
+.job-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.1rem;
+}
+
+.status-control {
+  margin: 0;
+}
+
+@media (min-width: 720px) {
+  .job-head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .status-control {
+    min-width: 16rem;
+  }
 }
 
 [hidden] {

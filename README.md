@@ -15,7 +15,7 @@ Open [http://localhost:3000](http://localhost:3000).
 Optional:
 
 - `MAKE_WEBHOOK_URL` — Make.com custom webhook. If empty, the app still saves requests and skips the outbound call.
-- `ADMIN_KEY` — required to change status with `PATCH /api/requests/:id`.
+- `ADMIN_KEY` — required to sign in at `/admin.html` and to change status with `PATCH /api/requests/:id`.
 - `PUBLIC_BASE_URL` — absolute origin used in webhook `status_url` values. On Render this falls back to `RENDER_EXTERNAL_URL`.
 - `DATABASE_URL` — Postgres connection string. When set, SQLite is not used.
 - `DATABASE_PATH` — local SQLite file. Used only when `DATABASE_URL` is empty.
@@ -59,6 +59,12 @@ Creates a request. Status starts at `received`.
 ```
 
 The `id` is unguessable. Share only the status URL with the client.
+
+### `GET /api/admin/requests`
+
+Header: `X-Admin-Key: $ADMIN_KEY`
+
+Returns `{ "statuses": [...], "requests": [...] }` for the admin board.
 
 ### `GET /api/requests/:id`
 
