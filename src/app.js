@@ -1,4 +1,4 @@
-import { randomBytes, timingSafeEqual } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import express from "express";
 import {
   ACCESS_COOKIE,
@@ -18,14 +18,6 @@ import {
 } from "./constants.js";
 import { parseCreateBody, parseStatusBody } from "./validate.js";
 import { buildWebhookPayload } from "./webhook.js";
-
-function adminKeyMatches(provided, expected) {
-  if (!expected || !provided) return false;
-  const a = Buffer.from(String(provided));
-  const b = Buffer.from(String(expected));
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
 
 function fireWebhook(sendWebhook, payload) {
   void Promise.resolve(sendWebhook(payload)).catch((err) => {
@@ -60,6 +52,15 @@ export function createApp({
     if (!sitePassword) return true;
     const token = readCookie(req.headers.cookie, ACCESS_COOKIE);
     return verifyAccessToken(sitePassword, token);
+  }
+
+  function adminConfigured() {
+    return Boolean(adminKey || sitePassword);
+  }
+
+  function hasAdmin(req) {
+    const provided = req.get("x-admin-key");
+    return passwordMatches(provided, adminKey) || passwordMatches(provided, sitePassword);
   }
 
   app.get("/api/public-config", (_req, res) => {
@@ -144,10 +145,10 @@ export function createApp({
   });
 
   app.get("/api/admin/requests", async (req, res) => {
-    if (!adminKey) {
+    if (!adminConfigured()) {
       return res.status(503).json({ error: "Admin access is not configured." });
     }
-    if (!adminKeyMatches(req.get("x-admin-key"), adminKey)) {
+    if (!hasAdmin(req)) {
       return res.status(401).json({ error: "Unauthorized." });
     }
 
@@ -168,10 +169,10 @@ export function createApp({
   });
 
   app.patch("/api/requests/:id", async (req, res) => {
-    if (!adminKey) {
+    if (!adminConfigured()) {
       return res.status(503).json({ error: "Status updates are not configured." });
     }
-    if (!adminKeyMatches(req.get("x-admin-key"), adminKey)) {
+    if (!hasAdmin(req)) {
       return res.status(401).json({ error: "Unauthorized." });
     }
 

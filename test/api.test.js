@@ -130,6 +130,49 @@ describe("intake API", { concurrency: false }, () => {
     assert.ok(updateEvent);
     assert.equal(updateEvent.previous_status, "received");
     assert.equal(updateEvent.request.status, "reviewing");
+    assert.equal(updateEvent.notify_email, null);
+  });
+
+  it("lets the demo password open the admin board and change status", async () => {
+    ctx = await startTestApp({
+      adminKey: "",
+      sitePassword: "demo-pass",
+    });
+    const login = await fetch(`${ctx.url}/api/access`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: "demo-pass" }),
+    });
+    const cookie = login.headers.get("set-cookie")?.split(";")[0];
+    const created = await fetch(`${ctx.url}/api/requests`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookie,
+      },
+      body: JSON.stringify({
+        ...sampleInquiry,
+        notify_email: "tester@example.com",
+      }),
+    });
+    const { id } = await created.json();
+
+    const listed = await fetch(`${ctx.url}/api/admin/requests`, {
+      headers: { "X-Admin-Key": "demo-pass" },
+    });
+    assert.equal(listed.status, 200);
+
+    const updated = await fetch(`${ctx.url}/api/requests/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Admin-Key": "demo-pass",
+      },
+      body: JSON.stringify({ status: "quoted" }),
+    });
+    assert.equal(updated.status, 200);
+    const updateEvent = ctx.events.find((event) => event.event === "request.updated");
+    assert.equal(updateEvent.notify_email, "tester@example.com");
   });
 
   it("blocks public submissions when a site password is set", async () => {

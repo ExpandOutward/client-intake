@@ -15,8 +15,8 @@ Open [http://localhost:3000](http://localhost:3000).
 Optional:
 
 - `MAKE_WEBHOOK_URL` — Make.com custom webhook. If empty, the app still saves requests and skips the outbound call.
-- `ADMIN_KEY` — required to sign in at `/admin.html` and to change status with `PATCH /api/requests/:id`.
-- `SITE_PASSWORD` — when set, the public form requires this login before a request can be submitted.
+- `ADMIN_KEY` — optional extra admin credential. The demo `SITE_PASSWORD` also signs in at `/admin.html`.
+- `SITE_PASSWORD` — unlocks the public form and the admin board.
 - `CONTACT_EMAIL` — shown on the login screen so people can ask you for demo access.
 - `PUBLIC_BASE_URL` — absolute origin used in webhook `status_url` values. On Render this falls back to `RENDER_EXTERNAL_URL`.
 - `DATABASE_URL` — Postgres connection string. When set, SQLite is not used.
