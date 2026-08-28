@@ -48,8 +48,7 @@ function setContact(contactEmail) {
 }
 
 function lockForm(contactEmail) {
-  intakeFields.disabled = true;
-  form.classList.add("locked");
+  setIntakeLocked(true);
   form.hidden = false;
   pageIntro.hidden = false;
   thanks.hidden = true;
@@ -60,8 +59,7 @@ function lockForm(contactEmail) {
 }
 
 function unlockForm() {
-  intakeFields.disabled = false;
-  form.classList.remove("locked");
+  setIntakeLocked(false);
   form.hidden = false;
   pageIntro.hidden = false;
   accessLocked.hidden = true;
@@ -70,8 +68,7 @@ function unlockForm() {
 }
 
 function openForm() {
-  intakeFields.disabled = false;
-  form.classList.remove("locked");
+  setIntakeLocked(false);
   accessPanel.hidden = true;
 }
 
