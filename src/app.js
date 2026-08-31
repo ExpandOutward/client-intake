@@ -19,7 +19,27 @@ import {
 import { csvRowsToObjects, parseCsv, toCsv } from "./csv.js";
 import { DEMO_JOBS } from "./demo.js";
 import { parseCreateBody, parseRestoreRow, parseStatusBody } from "./validate.js";
+import { LIST_SORTS } from "./db.js";
 import { buildWebhookPayload } from "./webhook.js";
+
+const MAX_ADMIN_PAGE_SIZE = 100;
+
+function parseAdminListQuery(query = {}) {
+  const q = typeof query.q === "string" ? query.q.trim().slice(0, 200) : "";
+  const sort = LIST_SORTS.includes(query.sort) ? query.sort : "newest";
+  let limit =
+    query.limit == null || query.limit === ""
+      ? null
+      : Number.parseInt(query.limit, 10);
+  if (!Number.isInteger(limit) || limit < 1) limit = null;
+  if (limit != null && limit > MAX_ADMIN_PAGE_SIZE) limit = MAX_ADMIN_PAGE_SIZE;
+  let offset =
+    query.offset == null || query.offset === ""
+      ? 0
+      : Number.parseInt(query.offset, 10);
+  if (!Number.isInteger(offset) || offset < 0) offset = 0;
+  return { q, sort, limit, offset };
+}
 
 function fireWebhook(sendWebhook, payload) {
   void Promise.resolve(sendWebhook(payload)).catch((err) => {
@@ -154,10 +174,16 @@ export function createApp({
       return res.status(401).json({ error: "Unauthorized." });
     }
 
-    const rows = await db.listRequests();
+    const options = parseAdminListQuery(req.query);
+    const { rows, total, q, sort, limit, offset } = await db.listRequests(options);
     return res.json({
       statuses: statusOptions(),
       requests: rows.map(presentRequest),
+      total,
+      q,
+      sort,
+      limit,
+      offset,
     });
   });
 
@@ -242,7 +268,7 @@ export function createApp({
       });
     }
 
-    const rows = await db.listRequests();
+    const { rows } = await db.listRequests();
     return res.json({
       statuses: statusOptions(),
       requests: rows.map(presentRequest),
@@ -257,7 +283,7 @@ export function createApp({
       return res.status(401).json({ error: "Unauthorized." });
     }
 
-    const rows = await db.listRequests();
+    const { rows } = await db.listRequests();
     const csv = toCsv(rows.map(presentRequest));
     const day = new Date().toISOString().slice(0, 10);
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -300,7 +326,7 @@ export function createApp({
         await db.insertRequest(job);
       }
 
-      const rows = await db.listRequests();
+      const { rows } = await db.listRequests();
       return res.json({
         statuses: statusOptions(),
         requests: rows.map(presentRequest),

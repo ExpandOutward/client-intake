@@ -66,7 +66,15 @@ The `id` is unguessable. Share only the status URL with the client.
 
 Header: `X-Admin-Key: $ADMIN_KEY`
 
-Returns `{ "statuses": [...], "requests": [...] }` for the admin board.
+Returns `{ "statuses": [...], "requests": [...], "total": 0, "q": "", "sort": "newest", "limit": null, "offset": 0 }` for the admin board.
+
+Optional query params:
+
+- `q` — case-insensitive match on company, contact name, or email
+- `sort` — `newest`, `oldest`, `az`, or `za` (company name)
+- `limit` / `offset` — page size (max 100) and starting row
+
+The admin page loads the 2 newest jobs by default. Search and List All return 10 jobs per page.
 
 ### `GET /api/requests/:id`
 

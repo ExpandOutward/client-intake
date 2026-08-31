@@ -76,6 +76,74 @@ function toIso(value) {
   return value ?? null;
 }
 
+export const LIST_SORTS = ["newest", "oldest", "az", "za"];
+
+const SORT_SQL = {
+  newest: "created_at DESC, id DESC",
+  oldest: "created_at ASC, id ASC",
+  az: "LOWER(company) ASC, created_at DESC, id DESC",
+  za: "LOWER(company) DESC, created_at DESC, id DESC",
+};
+
+function likeContains(q) {
+  const escaped = q
+    .toLowerCase()
+    .replaceAll("\\", "\\\\")
+    .replaceAll("%", "\\%")
+    .replaceAll("_", "\\_");
+  return `%${escaped}%`;
+}
+
+export function normalizeListOptions(options = {}) {
+  const q = typeof options.q === "string" ? options.q.trim() : "";
+  const sort = SORT_SQL[options.sort] ? options.sort : "newest";
+  let limit = options.limit;
+  if (limit == null || limit === "") {
+    limit = null;
+  } else {
+    limit = Number.parseInt(limit, 10);
+    if (!Number.isInteger(limit) || limit < 1) limit = null;
+  }
+  let offset = Number.parseInt(options.offset ?? 0, 10);
+  if (!Number.isInteger(offset) || offset < 0) offset = 0;
+  return { q, sort, limit, offset };
+}
+
+function buildListSql(options, style) {
+  const { q, sort, limit, offset } = normalizeListOptions(options);
+  const params = [];
+  const addParam = (value) => {
+    params.push(value);
+    return style === "postgres" ? `$${params.length}` : "?";
+  };
+
+  let whereSql = "";
+  if (q) {
+    const pattern = likeContains(q);
+    const clauses = ["company", "name", "email"].map((col) => {
+      return `LOWER(${col}) LIKE ${addParam(pattern)} ESCAPE CHAR(92)`;
+    });
+    whereSql = `WHERE ${clauses.join(" OR ")}`;
+  }
+
+  const countParams = params.slice();
+  const countSql = `SELECT COUNT(*) AS total FROM requests ${whereSql}`;
+  const orderSql = `ORDER BY ${SORT_SQL[sort]}`;
+
+  let limitSql = "";
+  if (limit != null) {
+    limitSql = `LIMIT ${addParam(limit)} OFFSET ${addParam(offset)}`;
+  }
+
+  return {
+    countSql,
+    countParams,
+    listSql: `SELECT * FROM requests ${whereSql} ${orderSql} ${limitSql}`.trim(),
+    listParams: params,
+    meta: { q, sort, limit, offset },
+  };
+}
+
 function normalizeRow(row) {
   if (!row) return null;
   return {
@@ -132,11 +200,15 @@ export function createSqliteStore(path) {
         db.prepare("SELECT * FROM requests WHERE public_id = ?").get(publicId) ?? null,
       );
     },
-    async listRequests() {
-      return db
-        .prepare("SELECT * FROM requests ORDER BY created_at DESC, id ASC")
-        .all()
+    async listRequests(options = {}) {
+      const query = buildListSql(options, "sqlite");
+      const countRow = db.prepare(query.countSql).get(...query.countParams);
+      const total = Number(countRow?.total ?? 0);
+      const rows = db
+        .prepare(query.listSql)
+        .all(...query.listParams)
         .map(normalizeRow);
+      return { rows, total, ...query.meta };
     },
     async updateRequestStatus(publicId, status) {
       const now = new Date().toISOString();
@@ -200,11 +272,12 @@ export async function createPostgresStore(connectionString) {
       );
       return normalizeRow(result.rows[0] ?? null);
     },
-    async listRequests() {
-      const result = await pool.query(
-        "SELECT * FROM requests ORDER BY created_at DESC, id ASC",
-      );
-      return result.rows.map(normalizeRow);
+    async listRequests(options = {}) {
+      const query = buildListSql(options, "postgres");
+      const countResult = await pool.query(query.countSql, query.countParams);
+      const total = Number(countResult.rows[0]?.total ?? 0);
+      const result = await pool.query(query.listSql, query.listParams);
+      return { rows: result.rows.map(normalizeRow), total, ...query.meta };
     },
     async updateRequestStatus(publicId, status) {
       const now = new Date().toISOString();

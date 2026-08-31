@@ -1,6 +1,32 @@
 import assert from "node:assert/strict";
+import { randomBytes } from "node:crypto";
 import { afterEach, describe, it } from "node:test";
 import { closeServer, sampleInquiry, startTestApp } from "./helpers.js";
+
+function seedJob(overrides = {}) {
+  return {
+    public_id: randomBytes(16).toString("hex"),
+    name: "Priya Shah",
+    email: "priya@harborbookkeeping.com",
+    notify_email: null,
+    company: "Harbor Bookkeeping",
+    site: "1420 Mill Street, Suite 200",
+    project_type: "renovation",
+    square_footage: "1000_3000",
+    timeline: "1_3_months",
+    budget: "25k_75k",
+    message: "Open office for eight people.",
+    status: "received",
+    ...overrides,
+  };
+}
+
+function adminList(url, query = "") {
+  const suffix = query ? `?${query}` : "";
+  return fetch(`${url}/api/admin/requests${suffix}`, {
+    headers: { "X-Admin-Key": "test-admin-key" },
+  });
+}
 
 describe("intake API", { concurrency: false }, () => {
   let ctx;
@@ -216,14 +242,13 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(reset.status, 200);
     const body = await reset.json();
     assert.equal(body.requests.length, 2);
-    assert.equal(body.requests[0].company, "COMPANY 1 LLC");
-    assert.equal(body.requests[0].name, "Company Guy Sr.");
-    assert.equal(body.requests[0].email, "company.guy1@noreply.com");
-    assert.equal(body.requests[0].site, "123 Main Street, Pittsburgh, PA 15222");
-    assert.equal(body.requests[0].message, "Sample Data 1");
-    assert.equal(body.requests[1].company, "COMPANY 2 LLC");
-    assert.equal(body.requests[1].name, "Company Guy Jr.");
-    assert.equal(body.requests[1].site, "1 Main Road, Pittsburgh, PA 15222");
+    const byCompany = Object.fromEntries(body.requests.map((row) => [row.company, row]));
+    assert.equal(byCompany["COMPANY 1 LLC"].name, "Company Guy Sr.");
+    assert.equal(byCompany["COMPANY 1 LLC"].email, "company.guy1@noreply.com");
+    assert.equal(byCompany["COMPANY 1 LLC"].site, "123 Main Street, Pittsburgh, PA 15222");
+    assert.equal(byCompany["COMPANY 1 LLC"].message, "Sample Data 1");
+    assert.equal(byCompany["COMPANY 2 LLC"].name, "Company Guy Jr.");
+    assert.equal(byCompany["COMPANY 2 LLC"].site, "1 Main Road, Pittsburgh, PA 15222");
     assert.equal(ctx.events.length, 1);
   });
 
@@ -329,8 +354,127 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(listed.status, 200);
     const body = await listed.json();
     assert.equal(body.requests.length, 1);
+    assert.equal(body.total, 1);
+    assert.equal(body.sort, "newest");
     assert.equal(body.requests[0].company, "Harbor Bookkeeping");
     assert.ok(body.statuses.some((status) => status.value === "reviewing"));
+  });
+
+  it("searches admin jobs by company, contact name, or email", async () => {
+    ctx = await startTestApp();
+    await ctx.db.insertRequest(
+      seedJob({
+        company: "Harbor Bookkeeping",
+        name: "Priya Shah",
+        email: "priya@harborbookkeeping.com",
+        site: "Apex warehouse",
+        message: "Ask Jordan about paint.",
+        created_at: "2026-01-01T00:00:00.000Z",
+      }),
+    );
+    await ctx.db.insertRequest(
+      seedJob({
+        company: "Apex Builders",
+        name: "Jordan Lee",
+        email: "jordan@apex.test",
+        site: "Harbor Street",
+        message: "Priya wants new lighting.",
+        created_at: "2026-02-01T00:00:00.000Z",
+      }),
+    );
+    await ctx.db.insertRequest(
+      seedJob({
+        company: "Northside Dental",
+        name: "Chris Ng",
+        email: "chris@northside.test",
+        created_at: "2026-03-01T00:00:00.000Z",
+      }),
+    );
+
+    const byCompany = await adminList(ctx.url, "q=harbor");
+    const companyBody = await byCompany.json();
+    assert.equal(byCompany.status, 200);
+    assert.equal(companyBody.total, 1);
+    assert.equal(companyBody.requests[0].company, "Harbor Bookkeeping");
+
+    const byName = await adminList(ctx.url, "q=jordan");
+    const nameBody = await byName.json();
+    assert.equal(nameBody.total, 1);
+    assert.equal(nameBody.requests[0].name, "Jordan Lee");
+
+    const byEmail = await adminList(ctx.url, "q=chris@northside.test");
+    const emailBody = await byEmail.json();
+    assert.equal(emailBody.total, 1);
+    assert.equal(emailBody.requests[0].email, "chris@northside.test");
+
+    const noSiteOrMessage = await adminList(ctx.url, "q=warehouse");
+    const missed = await noSiteOrMessage.json();
+    assert.equal(missed.total, 0);
+    assert.equal(missed.requests.length, 0);
+  });
+
+  it("sorts and paginates the admin job list", async () => {
+    ctx = await startTestApp();
+    const jobs = [
+      { company: "Zulu Office", name: "Ann", email: "ann@zulu.test", created_at: "2026-01-01T00:00:00.000Z" },
+      { company: "Alpha Shop", name: "Bea", email: "bea@alpha.test", created_at: "2026-02-01T00:00:00.000Z" },
+      { company: "Midtown Lab", name: "Cal", email: "cal@midtown.test", created_at: "2026-03-01T00:00:00.000Z" },
+    ];
+    for (const job of jobs) {
+      await ctx.db.insertRequest(seedJob(job));
+    }
+
+    const newest = await (await adminList(ctx.url, "sort=newest")).json();
+    assert.deepEqual(
+      newest.requests.map((row) => row.company),
+      ["Midtown Lab", "Alpha Shop", "Zulu Office"],
+    );
+
+    const oldest = await (await adminList(ctx.url, "sort=oldest")).json();
+    assert.deepEqual(
+      oldest.requests.map((row) => row.company),
+      ["Zulu Office", "Alpha Shop", "Midtown Lab"],
+    );
+
+    const az = await (await adminList(ctx.url, "sort=az")).json();
+    assert.deepEqual(
+      az.requests.map((row) => row.company),
+      ["Alpha Shop", "Midtown Lab", "Zulu Office"],
+    );
+
+    const za = await (await adminList(ctx.url, "sort=za")).json();
+    assert.deepEqual(
+      za.requests.map((row) => row.company),
+      ["Zulu Office", "Midtown Lab", "Alpha Shop"],
+    );
+
+    const page = await (await adminList(ctx.url, "limit=2&offset=0&sort=newest")).json();
+    assert.equal(page.total, 3);
+    assert.equal(page.limit, 2);
+    assert.equal(page.offset, 0);
+    assert.equal(page.requests.length, 2);
+    assert.deepEqual(
+      page.requests.map((row) => row.company),
+      ["Midtown Lab", "Alpha Shop"],
+    );
+
+    const nextPage = await (await adminList(ctx.url, "limit=2&offset=2&sort=newest")).json();
+    assert.equal(nextPage.total, 3);
+    assert.equal(nextPage.requests.length, 1);
+    assert.equal(nextPage.requests[0].company, "Zulu Office");
+  });
+
+  it("treats search wildcards as literal text", async () => {
+    ctx = await startTestApp();
+    await ctx.db.insertRequest(seedJob({ company: "100% Construction" }));
+    await ctx.db.insertRequest(seedJob({ company: "Harbor Bookkeeping", name: "Sam Underscore" }));
+
+    const percent = await (await adminList(ctx.url, "q=100%25")).json();
+    assert.equal(percent.total, 1);
+    assert.equal(percent.requests[0].company, "100% Construction");
+
+    const underscore = await (await adminList(ctx.url, "q=_")).json();
+    assert.equal(underscore.total, 0);
   });
 
   it("serves the intake page and health check", async () => {
@@ -344,5 +488,12 @@ describe("intake API", { concurrency: false }, () => {
     const health = await fetch(`${ctx.url}/health`);
     assert.equal(health.status, 200);
     assert.deepEqual(await health.json(), { ok: true });
+
+    const admin = await fetch(`${ctx.url}/admin.html`);
+    assert.equal(admin.status, 200);
+    const adminHtml = await admin.text();
+    assert.match(adminHtml, /id="search-form"/);
+    assert.match(adminHtml, /List All/);
+    assert.match(adminHtml, /Company A–Z/);
   });
 });

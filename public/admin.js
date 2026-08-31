@@ -1,4 +1,6 @@
 const KEY_STORAGE = "admin-key";
+const PAGE_SIZE = 10;
+const RECENT_LIMIT = 2;
 
 const loginForm = document.getElementById("login-form");
 const loginError = document.getElementById("login-error");
@@ -8,10 +10,27 @@ const restoreBtn = document.getElementById("restore-jobs");
 const restoreFile = document.getElementById("restore-file");
 const resetDemoBtn = document.getElementById("reset-demo");
 const signOutBtn = document.getElementById("sign-out");
+const boardTools = document.getElementById("board-tools");
+const searchForm = document.getElementById("search-form");
+const jobSearch = document.getElementById("job-search");
+const listAllBtn = document.getElementById("list-all");
+const jobSort = document.getElementById("job-sort");
 const jobList = document.getElementById("job-list");
+const boardSummary = document.getElementById("board-summary");
 const boardEmpty = document.getElementById("board-empty");
 const boardError = document.getElementById("board-error");
 const boardNote = document.getElementById("board-note");
+const boardPager = document.getElementById("board-pager");
+const pagerStatus = document.getElementById("pager-status");
+const pagerPrev = document.getElementById("pager-prev");
+const pagerNext = document.getElementById("pager-next");
+
+const boardState = {
+  mode: "recent",
+  q: "",
+  sort: "newest",
+  offset: 0,
+};
 
 function getKey() {
   return sessionStorage.getItem(KEY_STORAGE) || "";
@@ -117,27 +136,98 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+function resetBoardState() {
+  boardState.mode = "recent";
+  boardState.q = "";
+  boardState.sort = "newest";
+  boardState.offset = 0;
+  jobSearch.value = "";
+  jobSort.value = "newest";
+}
+
+function listParams() {
+  const params = new URLSearchParams();
+  params.set("sort", boardState.sort);
+  if (boardState.mode === "recent") {
+    params.set("limit", String(RECENT_LIMIT));
+    params.set("offset", "0");
+    return params;
+  }
+
+  params.set("limit", String(PAGE_SIZE));
+  params.set("offset", String(boardState.offset));
+  if (boardState.mode === "search" && boardState.q) {
+    params.set("q", boardState.q);
+  }
+  return params;
+}
+
 async function fetchJobs(key) {
-  const response = await fetch("/api/admin/requests", {
+  const response = await fetch(`/api/admin/requests?${listParams()}`, {
     headers: { "X-Admin-Key": key },
   });
   const body = await response.json().catch(() => null);
   return { response, body };
 }
 
+function showSummary(message) {
+  boardSummary.textContent = message;
+  boardSummary.hidden = !message;
+}
+
+function emptyMessage() {
+  if (boardState.mode === "search") return "No jobs matched that search.";
+  return "No requests yet.";
+}
+
+function updatePager(total, shown) {
+  if (boardState.mode === "recent") {
+    boardPager.hidden = true;
+    pagerStatus.textContent = "";
+    if (total > shown) {
+      showSummary(
+        `Showing the ${shown} most recent jobs. Search or list all to browse the rest.`,
+      );
+    } else {
+      showSummary("");
+    }
+    return;
+  }
+
+  const start = total === 0 || shown === 0 ? 0 : boardState.offset + 1;
+  const end = boardState.offset + shown;
+  const label =
+    boardState.mode === "search"
+      ? `Showing ${start}–${end} of ${total} matches`
+      : `Showing ${start}–${end} of ${total}`;
+  pagerStatus.textContent = total === 0 ? "" : label;
+  const multiPage = total > PAGE_SIZE;
+  pagerPrev.disabled = boardState.offset <= 0;
+  pagerNext.disabled = boardState.offset + shown >= total;
+  pagerPrev.hidden = !multiPage;
+  pagerNext.hidden = !multiPage;
+  boardPager.hidden = total === 0;
+  showSummary("");
+}
+
 function showLoggedOut() {
   loginForm.hidden = false;
   adminActions.hidden = true;
+  boardTools.hidden = true;
+  boardPager.hidden = true;
   jobList.hidden = true;
   jobList.innerHTML = "";
   boardEmpty.hidden = true;
   boardError.hidden = true;
+  showSummary("");
   showNote("");
+  resetBoardState();
 }
 
 function showLoggedIn() {
   loginForm.hidden = true;
   adminActions.hidden = false;
+  boardTools.hidden = false;
 }
 
 async function loadBoard(key) {
@@ -159,10 +249,24 @@ async function loadBoard(key) {
   showLoggedIn();
   const requests = body.requests || [];
   const statuses = body.statuses || [];
+  const total = body.total ?? requests.length;
+
+  if (
+    !requests.length &&
+    boardState.mode !== "recent" &&
+    boardState.offset > 0 &&
+    total > 0
+  ) {
+    boardState.offset = Math.max(0, boardState.offset - PAGE_SIZE);
+    return loadBoard(key);
+  }
+
   jobList.innerHTML = "";
   if (!requests.length) {
+    boardEmpty.textContent = emptyMessage();
     boardEmpty.hidden = false;
     jobList.hidden = true;
+    updatePager(total, 0);
     return true;
   }
 
@@ -171,6 +275,7 @@ async function loadBoard(key) {
   for (const request of requests) {
     jobList.append(jobCard(request, statuses));
   }
+  updatePager(total, requests.length);
   return true;
 }
 
@@ -184,8 +289,52 @@ loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  resetBoardState();
   const ok = await loadBoard(key);
   if (ok) setKey(key);
+});
+
+searchForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const q = jobSearch.value.trim();
+  if (!q) {
+    showNote("Enter a company, contact name, or email to search.");
+    jobSearch.focus();
+    return;
+  }
+
+  boardState.mode = "search";
+  boardState.q = q;
+  boardState.offset = 0;
+  showNote("");
+  await loadBoard(getKey());
+});
+
+listAllBtn.addEventListener("click", async () => {
+  boardState.mode = "all";
+  boardState.offset = 0;
+  showNote("");
+  await loadBoard(getKey());
+});
+
+jobSort.addEventListener("change", async () => {
+  boardState.sort = jobSort.value;
+  if (boardState.mode === "recent") {
+    boardState.mode = "all";
+  }
+  boardState.offset = 0;
+  showNote("");
+  await loadBoard(getKey());
+});
+
+pagerPrev.addEventListener("click", async () => {
+  boardState.offset = Math.max(0, boardState.offset - PAGE_SIZE);
+  await loadBoard(getKey());
+});
+
+pagerNext.addEventListener("click", async () => {
+  boardState.offset += PAGE_SIZE;
+  await loadBoard(getKey());
 });
 
 signOutBtn.addEventListener("click", () => {
@@ -259,6 +408,7 @@ restoreFile.addEventListener("change", async () => {
       return;
     }
     showNote("Restore complete. All jobs were replaced from the backup. No emails were sent.");
+    resetBoardState();
     await loadBoard(key);
   } catch {
     showNote("Could not restore from this file.");
@@ -291,6 +441,7 @@ resetDemoBtn.addEventListener("click", async () => {
       return;
     }
     showNote("Demo reset. Two sample jobs are loaded. No emails were sent.");
+    resetBoardState();
     await loadBoard(key);
   } catch {
     showNote("Could not reset the demo.");

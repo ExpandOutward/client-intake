@@ -41,10 +41,46 @@
       <p id="login-error" class="error" hidden role="alert"></p>
     </form>
 
+    <div id="board-tools" hidden>
+      <form id="search-form" class="board-search">
+        <label>
+          Search jobs
+          <input
+            type="search"
+            id="job-search"
+            name="q"
+            placeholder="Company, contact, or email"
+            autocomplete="off"
+          />
+        </label>
+        <div class="board-search-actions">
+          <button type="submit">Search</button>
+          <button type="button" id="list-all" class="secondary">List All</button>
+        </div>
+      </form>
+      <label class="board-sort">
+        Sort
+        <select id="job-sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="az">Company A–Z</option>
+          <option value="za">Company Z–A</option>
+        </select>
+      </label>
+    </div>
+
+    <p id="board-summary" class="hint" hidden></p>
     <p id="board-empty" hidden>No requests yet.</p>
     <p id="board-error" class="error" hidden role="alert"></p>
     <p id="board-note" class="hint" hidden></p>
     <div id="job-list" hidden></div>
+    <nav id="board-pager" class="board-pager" hidden>
+      <p id="pager-status" class="hint"></p>
+      <div class="pager-actions">
+        <button type="button" id="pager-prev" class="secondary">Previous</button>
+        <button type="button" id="pager-next" class="secondary">Next</button>
+      </div>
+    </nav>
   </main>
 
   <footer class="site-foot">
