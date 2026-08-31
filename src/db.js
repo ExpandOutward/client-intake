@@ -109,19 +109,22 @@ export function normalizeListOptions(options = {}) {
   return { q, sort, limit, offset };
 }
 
-function buildListSql(options, style) {
+export function buildListSql(options, style) {
   const { q, sort, limit, offset } = normalizeListOptions(options);
   const params = [];
   const addParam = (value) => {
     params.push(value);
     return style === "postgres" ? `$${params.length}` : "?";
   };
+  // SQLite's CHAR(n) is a function (code point). Postgres CHAR(n) is a type,
+  // so search must use chr(n) there or the query 500s.
+  const escapeChar = style === "postgres" ? "chr(92)" : "char(92)";
 
   let whereSql = "";
   if (q) {
     const pattern = likeContains(q);
     const clauses = ["company", "name", "email"].map((col) => {
-      return `LOWER(${col}) LIKE ${addParam(pattern)} ESCAPE CHAR(92)`;
+      return `LOWER(${col}) LIKE ${addParam(pattern)} ESCAPE ${escapeChar}`;
     });
     whereSql = `WHERE ${clauses.join(" OR ")}`;
   }
