@@ -2,6 +2,7 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import pg from "pg";
+import { STATUSES } from "./constants.js";
 
 const SQLITE_SCHEMA = `
   PRAGMA journal_mode = WAL;
@@ -97,6 +98,7 @@ function likeContains(q) {
 export function normalizeListOptions(options = {}) {
   const q = typeof options.q === "string" ? options.q.trim() : "";
   const sort = SORT_SQL[options.sort] ? options.sort : "newest";
+  const status = STATUSES.includes(options.status) ? options.status : "";
   let limit = options.limit;
   if (limit == null || limit === "") {
     limit = null;
@@ -106,11 +108,11 @@ export function normalizeListOptions(options = {}) {
   }
   let offset = Number.parseInt(options.offset ?? 0, 10);
   if (!Number.isInteger(offset) || offset < 0) offset = 0;
-  return { q, sort, limit, offset };
+  return { q, sort, status, limit, offset };
 }
 
 export function buildListSql(options, style) {
-  const { q, sort, limit, offset } = normalizeListOptions(options);
+  const { q, sort, status, limit, offset } = normalizeListOptions(options);
   const params = [];
   const addParam = (value) => {
     params.push(value);
@@ -120,14 +122,18 @@ export function buildListSql(options, style) {
   // so search must use chr(n) there or the query 500s.
   const escapeChar = style === "postgres" ? "chr(92)" : "char(92)";
 
-  let whereSql = "";
+  const where = [];
+  if (status) {
+    where.push(`status = ${addParam(status)}`);
+  }
   if (q) {
     const pattern = likeContains(q);
     const clauses = ["company", "name", "email"].map((col) => {
       return `LOWER(${col}) LIKE ${addParam(pattern)} ESCAPE ${escapeChar}`;
     });
-    whereSql = `WHERE ${clauses.join(" OR ")}`;
+    where.push(`(${clauses.join(" OR ")})`);
   }
+  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
   const countParams = params.slice();
   const countSql = `SELECT COUNT(*) AS total FROM requests ${whereSql}`;
@@ -143,7 +149,7 @@ export function buildListSql(options, style) {
     countParams,
     listSql: `SELECT * FROM requests ${whereSql} ${orderSql} ${limitSql}`.trim(),
     listParams: params,
-    meta: { q, sort, limit, offset },
+    meta: { q, sort, status, limit, offset },
   };
 }
 

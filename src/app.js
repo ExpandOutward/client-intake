@@ -27,6 +27,7 @@ const MAX_ADMIN_PAGE_SIZE = 100;
 function parseAdminListQuery(query = {}) {
   const q = typeof query.q === "string" ? query.q.trim().slice(0, 200) : "";
   const sort = LIST_SORTS.includes(query.sort) ? query.sort : "newest";
+  const status = STATUSES.includes(query.status) ? query.status : "";
   let limit =
     query.limit == null || query.limit === ""
       ? null
@@ -38,7 +39,7 @@ function parseAdminListQuery(query = {}) {
       ? 0
       : Number.parseInt(query.offset, 10);
   if (!Number.isInteger(offset) || offset < 0) offset = 0;
-  return { q, sort, limit, offset };
+  return { q, sort, status, limit, offset };
 }
 
 function fireWebhook(sendWebhook, payload) {
@@ -175,13 +176,14 @@ export function createApp({
     }
 
     const options = parseAdminListQuery(req.query);
-    const { rows, total, q, sort, limit, offset } = await db.listRequests(options);
+    const { rows, total, q, sort, status, limit, offset } = await db.listRequests(options);
     return res.json({
       statuses: statusOptions(),
       requests: rows.map(presentRequest),
       total,
       q,
       sort,
+      status,
       limit,
       offset,
     });

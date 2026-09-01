@@ -58,15 +58,23 @@
           <button type="button" id="list-all" class="secondary">List All</button>
         </div>
       </form>
-      <label class="board-sort">
-        Sort
-        <select id="job-sort">
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="az">Company A–Z</option>
-          <option value="za">Company Z–A</option>
-        </select>
-      </label>
+      <div class="board-filters">
+        <label class="board-sort">
+          Sort
+          <select id="job-sort">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="az">Company A–Z</option>
+            <option value="za">Company Z–A</option>
+          </select>
+        </label>
+        <label class="board-status-filter">
+          Status
+          <select id="job-status-filter">
+            <option value="">Any status</option>
+          </select>
+        </label>
+      </div>
     </div>
 
     <p id="board-summary" class="hint" hidden></p>

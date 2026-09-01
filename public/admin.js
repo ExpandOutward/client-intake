@@ -15,6 +15,7 @@ const searchForm = document.getElementById("search-form");
 const jobSearch = document.getElementById("job-search");
 const listAllBtn = document.getElementById("list-all");
 const jobSort = document.getElementById("job-sort");
+const jobStatusFilter = document.getElementById("job-status-filter");
 const jobList = document.getElementById("job-list");
 const boardSummary = document.getElementById("board-summary");
 const boardEmpty = document.getElementById("board-empty");
@@ -29,6 +30,7 @@ const boardState = {
   mode: "recent",
   q: "",
   sort: "newest",
+  status: "",
   offset: 0,
 };
 
@@ -140,14 +142,26 @@ function resetBoardState() {
   boardState.mode = "recent";
   boardState.q = "";
   boardState.sort = "newest";
+  boardState.status = "";
   boardState.offset = 0;
   jobSearch.value = "";
   jobSort.value = "newest";
+  jobStatusFilter.value = "";
+}
+
+function fillStatusFilter(statuses) {
+  if (jobStatusFilter.dataset.ready === "1") {
+    jobStatusFilter.value = boardState.status;
+    return;
+  }
+  jobStatusFilter.innerHTML = `<option value="">Any status</option>${optionHtml(statuses, boardState.status)}`;
+  jobStatusFilter.dataset.ready = "1";
 }
 
 function listParams() {
   const params = new URLSearchParams();
   params.set("sort", boardState.sort);
+  if (boardState.status) params.set("status", boardState.status);
   if (boardState.mode === "recent") {
     params.set("limit", String(RECENT_LIMIT));
     params.set("offset", "0");
@@ -177,6 +191,7 @@ function showSummary(message) {
 
 function emptyMessage() {
   if (boardState.mode === "search") return "No jobs matched that search.";
+  if (boardState.status) return "No jobs with that status.";
   return "No requests yet.";
 }
 
@@ -250,6 +265,7 @@ async function loadBoard(key) {
   const requests = body.requests || [];
   const statuses = body.statuses || [];
   const total = body.total ?? requests.length;
+  fillStatusFilter(statuses);
 
   if (
     !requests.length &&
@@ -319,6 +335,16 @@ listAllBtn.addEventListener("click", async () => {
 
 jobSort.addEventListener("change", async () => {
   boardState.sort = jobSort.value;
+  if (boardState.mode === "recent") {
+    boardState.mode = "all";
+  }
+  boardState.offset = 0;
+  showNote("");
+  await loadBoard(getKey());
+});
+
+jobStatusFilter.addEventListener("change", async () => {
+  boardState.status = jobStatusFilter.value;
   if (boardState.mode === "recent") {
     boardState.mode = "all";
   }
@@ -508,6 +534,9 @@ jobList.addEventListener("change", async (event) => {
       return;
     }
     showNote(`Saved as ${body.status_label}. A status email will go out to the client.`);
+    if (boardState.status && boardState.status !== body.status) {
+      await loadBoard(key);
+    }
   } catch {
     showNote("Could not update status.");
   } finally {

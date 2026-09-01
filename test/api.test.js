@@ -477,6 +477,56 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(underscore.total, 0);
   });
 
+  it("filters admin jobs by status", async () => {
+    ctx = await startTestApp();
+    await ctx.db.insertRequest(
+      seedJob({
+        company: "Harbor Bookkeeping",
+        status: "completed",
+        created_at: "2026-01-01T00:00:00.000Z",
+      }),
+    );
+    await ctx.db.insertRequest(
+      seedJob({
+        company: "Apex Builders",
+        name: "Jordan Lee",
+        email: "jordan@apex.test",
+        status: "reviewing",
+        created_at: "2026-02-01T00:00:00.000Z",
+      }),
+    );
+    await ctx.db.insertRequest(
+      seedJob({
+        company: "Northside Dental",
+        name: "Chris Ng",
+        email: "chris@northside.test",
+        status: "completed",
+        created_at: "2026-03-01T00:00:00.000Z",
+      }),
+    );
+
+    const completed = await (await adminList(ctx.url, "status=completed")).json();
+    assert.equal(completed.total, 2);
+    assert.equal(completed.status, "completed");
+    assert.deepEqual(
+      completed.requests.map((row) => row.company),
+      ["Northside Dental", "Harbor Bookkeeping"],
+    );
+    assert.ok(completed.requests.every((row) => row.status === "completed"));
+
+    const reviewing = await (await adminList(ctx.url, "status=reviewing")).json();
+    assert.equal(reviewing.total, 1);
+    assert.equal(reviewing.requests[0].company, "Apex Builders");
+
+    const withSearch = await (await adminList(ctx.url, "status=completed&q=harbor")).json();
+    assert.equal(withSearch.total, 1);
+    assert.equal(withSearch.requests[0].company, "Harbor Bookkeeping");
+
+    const ignored = await (await adminList(ctx.url, "status=not-a-status")).json();
+    assert.equal(ignored.total, 3);
+    assert.equal(ignored.status, "");
+  });
+
   it("serves the intake page and health check", async () => {
     ctx = await startTestApp();
     const home = await fetch(`${ctx.url}/`);
@@ -495,5 +545,6 @@ describe("intake API", { concurrency: false }, () => {
     assert.match(adminHtml, /id="search-form"/);
     assert.match(adminHtml, /List All/);
     assert.match(adminHtml, /Company A–Z/);
+    assert.match(adminHtml, /id="job-status-filter"/);
   });
 });
