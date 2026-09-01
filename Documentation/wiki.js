@@ -1,5 +1,6 @@
 const navLinks = [...document.querySelectorAll("nav a")];
 const sections = [...document.querySelectorAll("main section[id]")];
+const scroller = document.querySelector("main");
 
 function setActive(id) {
   navLinks.forEach((link) => {
@@ -9,14 +10,25 @@ function setActive(id) {
   });
 }
 
+function scrollToId(id) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  setActive(id);
+}
+
 navLinks.forEach((link) => {
-  link.addEventListener("click", () => {
+  link.addEventListener("click", (event) => {
     const href = link.getAttribute("href") || "";
-    if (href.startsWith("#")) setActive(href.slice(1));
+    if (!href.startsWith("#")) return;
+    event.preventDefault();
+    const id = href.slice(1);
+    history.replaceState(null, "", href);
+    scrollToId(id);
   });
 });
 
-if (sections.length && "IntersectionObserver" in window) {
+if (sections.length && scroller && "IntersectionObserver" in window) {
   const observer = new IntersectionObserver(
     (entries) => {
       const visible = entries
@@ -24,11 +36,15 @@ if (sections.length && "IntersectionObserver" in window) {
         .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (visible) setActive(visible.target.id);
     },
-    { rootMargin: "-15% 0px -65% 0px", threshold: [0.1, 0.5, 1] },
+    {
+      root: scroller,
+      rootMargin: "-15% 0px -65% 0px",
+      threshold: [0.1, 0.5, 1],
+    },
   );
   sections.forEach((section) => observer.observe(section));
 }
 
 const initial = location.hash.replace(/^#/, "");
-if (initial) setActive(initial);
+if (initial) scrollToId(initial);
 else if (sections[0]) setActive(sections[0].id);
