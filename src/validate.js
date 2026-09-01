@@ -1,15 +1,47 @@
 import {
   BUDGETS,
+  BUDGET_LABELS,
   PROJECT_TYPES,
+  PROJECT_TYPE_LABELS,
   SQUARE_FOOTAGES,
+  SQUARE_FOOTAGE_LABELS,
   STATUSES,
+  STATUS_LABELS,
   TIMELINES,
+  TIMELINE_LABELS,
 } from "./constants.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function asTrimmedString(value) {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function normalizePublicId(value) {
+  const raw = asTrimmedString(value).replace(/^'/, "").replaceAll("-", "");
+  if (/^[a-f0-9]{32}$/i.test(raw)) return raw.toLowerCase();
+  return "";
+}
+
+function slugify(value) {
+  return asTrimmedString(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "");
+}
+
+function resolveEnum(value, codes, labels, fallback = "") {
+  const raw = asTrimmedString(value);
+  if (!raw) return fallback;
+  if (codes.includes(raw)) return raw;
+  const lower = raw.toLowerCase();
+  if (codes.includes(lower)) return lower;
+  const slug = slugify(raw);
+  if (codes.includes(slug)) return slug;
+  for (const [code, label] of Object.entries(labels)) {
+    if (label.toLowerCase() === lower || slugify(label) === slug) return code;
+  }
+  return null;
 }
 
 export function parseCreateBody(body) {
@@ -83,20 +115,45 @@ export function parseStatusBody(body) {
 }
 
 export function parseRestoreRow(body, index) {
-  const created = parseCreateBody(body);
+  const projectType = resolveEnum(body.project_type, PROJECT_TYPES, PROJECT_TYPE_LABELS);
+  const squareFootage = resolveEnum(
+    body.square_footage,
+    SQUARE_FOOTAGES,
+    SQUARE_FOOTAGE_LABELS,
+    "not_sure",
+  );
+  const timeline = resolveEnum(body.timeline, TIMELINES, TIMELINE_LABELS, "flexible");
+  const budget = resolveEnum(body.budget, BUDGETS, BUDGET_LABELS, "not_sure");
+  const status = resolveEnum(body.status, STATUSES, STATUS_LABELS, "received");
+
+  if (projectType === null) {
+    return { error: `Row ${index}: Select the type of work.` };
+  }
+  if (squareFootage === null) {
+    return { error: `Row ${index}: Select a valid space size.` };
+  }
+  if (timeline === null) {
+    return { error: `Row ${index}: Select a valid start window.` };
+  }
+  if (budget === null) {
+    return { error: `Row ${index}: Select a valid budget.` };
+  }
+  if (status === null) {
+    return { error: `Row ${index}: Select a valid status.` };
+  }
+
+  const created = parseCreateBody({
+    ...body,
+    project_type: projectType,
+    square_footage: squareFootage,
+    timeline,
+    budget,
+  });
   if (created.error) {
     return { error: `Row ${index}: ${created.error}` };
   }
 
-  const id = asTrimmedString(body.id);
-  if (!/^[a-f0-9]{32}$/i.test(id)) {
-    return { error: `Row ${index}: Each job needs a 32-character id.` };
-  }
-
-  const status = asTrimmedString(body.status) || "received";
-  if (!STATUSES.includes(status)) {
-    return { error: `Row ${index}: Select a valid status.` };
-  }
+  const id = normalizePublicId(body.id);
 
   const createdAt = asTrimmedString(body.created_at);
   const updatedAt = asTrimmedString(body.updated_at);

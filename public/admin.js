@@ -138,6 +138,18 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+async function readCsvFile(file) {
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+    return new TextDecoder("utf-16le").decode(buffer);
+  }
+  if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+    return new TextDecoder("utf-16be").decode(buffer);
+  }
+  return new TextDecoder("utf-8").decode(buffer);
+}
+
 function resetBoardState() {
   boardState.mode = "recent";
   boardState.q = "";
@@ -417,9 +429,10 @@ restoreFile.addEventListener("change", async () => {
   const key = getKey();
   restoreBtn.disabled = true;
   showNote("");
+  boardError.hidden = true;
 
   try {
-    const csv = await file.text();
+    const csv = await readCsvFile(file);
     const response = await fetch("/api/admin/restore", {
       method: "POST",
       headers: {
@@ -430,9 +443,12 @@ restoreFile.addEventListener("change", async () => {
     });
     const body = await response.json().catch(() => null);
     if (!response.ok) {
-      showNote(body?.error || "Could not restore from this file.");
+      boardError.textContent = body?.error || "Could not restore from this file.";
+      boardError.hidden = false;
+      showNote("");
       return;
     }
+    boardError.hidden = true;
     showNote("Restore complete. All jobs were replaced from the backup. No emails were sent.");
     resetBoardState();
     await loadBoard(key);

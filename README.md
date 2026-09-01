@@ -103,7 +103,7 @@ CSV download of every job. Header: `X-Admin-Key`.
 
 ### `POST /api/admin/restore`
 
-CSV body (`text/csv`). Overwrites all jobs. Does **not** call Make.com.
+CSV body (`text/csv`). Overwrites all jobs. Does **not** call Make.com. Missing or invalid job ids are generated automatically.
 
 ### `POST /api/admin/reset`
 

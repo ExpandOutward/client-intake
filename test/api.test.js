@@ -294,6 +294,77 @@ describe("intake API", { concurrency: false }, () => {
     assert.equal(ctx.events.length, 1);
   });
 
+  it("restores Excel-style CSVs with labels, sep= lines, and mixed headers", async () => {
+    ctx = await startTestApp();
+    const id = "b".repeat(32);
+    const csv = [
+      "sep=,",
+      "ID,name,email,notify_email,company,site,project_type,square_footage,timeline,budget,message,status,created_at,updated_at",
+      `${id},Priya Shah,priya@harborbookkeeping.com,,Harbor Bookkeeping,1420 Mill Street,Office renovation,"1,000–3,000 sq ft",1–3 months,"$25,000–75,000",Need a lobby,Complete,2026-01-01T00:00:00.000Z,2026-01-01T00:00:00.000Z`,
+    ].join("\n");
+
+    const restored = await fetch(`${ctx.url}/api/admin/restore`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "X-Admin-Key": "test-admin-key",
+      },
+      body: csv,
+    });
+    assert.equal(restored.status, 200);
+    const body = await restored.json();
+    assert.equal(body.requests.length, 1);
+    assert.equal(body.requests[0].company, "Harbor Bookkeeping");
+    assert.equal(body.requests[0].project_type, "renovation");
+    assert.equal(body.requests[0].square_footage, "1000_3000");
+    assert.equal(body.requests[0].timeline, "1_3_months");
+    assert.equal(body.requests[0].budget, "25k_75k");
+    assert.equal(body.requests[0].status, "completed");
+  });
+
+  it("generates job ids when the CSV omits them or they are not 32-character hex", async () => {
+    ctx = await startTestApp();
+    const csv = [
+      "name,email,company,project_type,square_footage,timeline,budget,message,status",
+      "Priya Shah,priya@harborbookkeeping.com,Harbor Bookkeeping,renovation,not_sure,flexible,not_sure,Need a lobby,received",
+      "Jordan Lee,jordan@apex.test,Apex Builders,renovation,not_sure,flexible,not_sure,Need paint,received",
+    ].join("\n");
+
+    const restored = await fetch(`${ctx.url}/api/admin/restore`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/csv",
+        "X-Admin-Key": "test-admin-key",
+      },
+      body: csv,
+    });
+    assert.equal(restored.status, 200);
+    const body = await restored.json();
+    assert.equal(body.requests.length, 2);
+    assert.match(body.requests[0].id, /^[a-f0-9]{32}$/);
+    assert.match(body.requests[1].id, /^[a-f0-9]{32}$/);
+    assert.notEqual(body.requests[0].id, body.requests[1].id);
+
+    const withRowNumbers = [
+      "id,name,email,company,project_type,square_footage,timeline,budget,message,status",
+      "1,Priya Shah,priya@harborbookkeeping.com,Harbor Bookkeeping,renovation,not_sure,flexible,not_sure,Need a lobby,received",
+      "2,Jordan Lee,jordan@apex.test,Apex Builders,renovation,not_sure,flexible,not_sure,Need paint,received",
+    ].join("\n");
+    const numbered = await fetch(`${ctx.url}/api/admin/restore`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/csv",
+        "X-Admin-Key": "test-admin-key",
+      },
+      body: withRowNumbers,
+    });
+    assert.equal(numbered.status, 200);
+    const numberedBody = await numbered.json();
+    assert.equal(numberedBody.requests.length, 2);
+    assert.match(numberedBody.requests[0].id, /^[a-f0-9]{32}$/);
+    assert.notEqual(numberedBody.requests[0].id, "1");
+  });
+
   it("blocks public submissions when a site password is set", async () => {
     ctx = await startTestApp({ sitePassword: "demo-pass" });
 

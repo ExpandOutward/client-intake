@@ -295,7 +295,7 @@ export function createApp({
 
   app.post(
     "/api/admin/restore",
-    express.text({ type: ["text/csv", "text/plain"], limit: "512kb" }),
+    express.text({ type: "*/*", limit: "512kb" }),
     async (req, res) => {
       if (!adminConfigured()) {
         return res.status(503).json({ error: "Admin access is not configured." });
@@ -304,7 +304,8 @@ export function createApp({
         return res.status(401).json({ error: "Unauthorized." });
       }
 
-      const parsedCsv = csvRowsToObjects(parseCsv(req.body));
+      const csvText = typeof req.body === "string" ? req.body : "";
+      const parsedCsv = csvRowsToObjects(parseCsv(csvText));
       if (parsedCsv.error) {
         return res.status(400).json({ error: parsedCsv.error });
       }
@@ -315,6 +316,9 @@ export function createApp({
         const parsed = parseRestoreRow(parsedCsv.value[i], i + 2);
         if (parsed.error) {
           return res.status(400).json({ error: parsed.error });
+        }
+        if (!parsed.value.public_id) {
+          parsed.value.public_id = randomBytes(16).toString("hex");
         }
         if (ids.has(parsed.value.public_id)) {
           return res.status(400).json({ error: "CSV contains duplicate job ids." });
