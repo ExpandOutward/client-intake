@@ -1,0 +1,129 @@
+:root {
+  --bg: #d6d0c4;
+  --ink: #1a1714;
+  --muted: #5c564d;
+  --accent: #9a3412;
+  --accent-hover: #7c2d12;
+  --card: #f6f2ea;
+  --line: #c3baab;
+  --steel: #24282c;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 16.5rem minmax(0, 1fr);
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  background: var(--accent);
+}
+
+nav {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow: auto;
+  padding: 1.35rem 0 2rem;
+  background: var(--accent);
+  color: #fff;
+}
+
+nav h4 {
+  margin: 1.25rem 1.1rem 0.45rem;
+  color: #e8c39e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+nav h4:first-child {
+  margin-top: 0.25rem;
+}
+
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+nav a {
+  display: block;
+  padding: 0.7rem 1.1rem;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+nav a:hover,
+nav a:focus-visible,
+nav a.is-active {
+  background: var(--accent-hover);
+}
+
+nav a:focus-visible {
+  outline: 2px solid #e8c39e;
+  outline-offset: -2px;
+}
+
+main {
+  min-height: 100vh;
+  padding: 2.25rem 2rem 2.5rem;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(to right, rgba(36, 40, 44, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(36, 40, 44, 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+main > * {
+  max-width: 44rem;
+}
+
+h1 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.85rem, 5vw, 2.35rem);
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+section {
+  margin: 2rem 0 0;
+  scroll-margin-top: 1.25rem;
+}
+
+section:target h1 {
+  color: var(--accent);
+}
+
+p {
+  margin: 0 0 0.9rem;
+  color: var(--ink);
+}
+
+@media (max-width: 720px) {
+  body {
+    grid-template-columns: 1fr;
+  }
+
+  nav {
+    position: static;
+    height: auto;
+  }
+}
