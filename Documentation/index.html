@@ -31,15 +31,17 @@
         </ul>
         <h4 href="#administrator">Administrator</h4>
         <ul>
-            <li><a href="#accessing-the-system">Accessing The Admin Page</a></li>
+            <li><a href="#accessing-the-admin-page">Accessing The Admin Page</a></li>
             <li><a href="#finding-jobs">Finding Jobs</a></li>
             <li><a href="#managing-jobs">Managing Jobs</a></li>
             <li><a href="#backup-and-restore">Backup and Restore</a></li>
         </ul>
         <h4 href="#support">Support</h4>
         <ul>
+            <li><a href="#common-issues">Common Issues</a></li>
             <li><a href="#scope-of-support">Scope of Support</a></li>
             <li><a href="#contact-developer">Contact Developer</a></li>
+            <li><a href="#additional-features">Additional Features</a></li>
         </ul>
 
     </nav>
@@ -50,51 +52,267 @@
 
         <section id="accessing-the-system">
             <h2>Accessing The System</h2>
-            <p>Content Here</p>
+            <p><strong>Note:</strong> This is a demo appllication locked behind a password to avoid spam and 
+            trolling efforts. If you are a client who wants to test the application, please contact the 
+            <a href="#contact-developer">Developer</a>.</p>
+            <ol>
+                <li>Open a web browser and navigate to the Client Intake Application URL.</li>
+            </ol>
+            <p><strong>Client URL:</strong> <a href=
+            https://client-intake-mb0l.onrender.com/">https://client-intake-mb0l.onrender.com/</a></p>
         </section>
 
         <section id="completing-the-form">
             <h2>Completing The Form</h2>
-            <p>Content Here</p>
+            <ol>
+                <li>Enter the <strong>Demo password</strong> <i>(Demo only)</i></li>
+                <li>Click <strong>Unlock form</strong> <i>(Demo only)</i></li>
+                <li>Complete the intake fields:</li>
+                <ul>
+                    <li><strong>Your name:</strong> Your first and last name</li>
+                    <li><strong>Work email:</strong> Your professional email address</li>
+                    <li><strong>Business name:</strong> The name of your company or business</li>
+                    <li><strong>Job site address:</strong> Street address and zip code</li>
+                    <li><strong>Send staff notifications to:</strong> The business-side email address to receive
+                    job notification <i>(Demo only)</i></li>
+                    <li><strong>Type of work:</strong> Select the type of work that you need</li>
+                    <li><strong>Approximate size:</strong> Select the size of the job site</li>
+                    <li><strong>When do you want to start?:</strong> Select the approximate start date range</li>
+                    <li><strong>Project budget:</strong> Select the approximate budget range</li> 
+                    <li><strong>Tell us about the space:</strong> Add any details that are important to the project that 
+                    have not already been included</li>
+                </ul>
+            </ol>
         </section>
 
         <section id="submitting-the-form">
             <h2>Submitting The Form</h2>
-            <p>Content Here</p>
+            <ol>
+                <li>Click the <strong>Request a site visit</strong> button</li>
+                <ul>
+                  <li>If successful, you will be forwarded to the <strong>Request received</strong> page</li>
+                  <li>If you do not see the <strong>Request received</strong> page, check your inbox for the 
+                  confirmation email</li>
+                  <li>If no confirmation email was received, please resubmit the form or reach out to the 
+                  <a href="#contact-developer">Developer</a>.</li>
+                </ul>
+            </ol>
         </section>
 
         <section id="receiving-updates">
             <h2>Receiving Updates</h2>
-            <p>Content Here</p>
+            <h3>Request Received page</h3>
+            <p>Potential clients are forwarded to the <strong>Request received</strong> page upon successful
+            form submission.</p>
+            <ul>
+                <li><strong>Project status:</strong> A status page created for each project that clients can 
+                bookmark and follow for status updates</li>
+                <li><strong>Copy link:</strong> Automatically copies the link for the <strong>Project status</strong> page</li>
+            </ul> 
+            <h3>Project Status page</h3>
+            <p>The <strong>Project status</strong> page displays the data submitted in the intake form and the current 
+            status of the project. This page is updated by the administrator as the project progresses.</p>
         </section>
 
        <h1>Administrator</h1>
-        <section id="accessing-the-system">
+        <section id="accessing-the-admin-page">
             <h2>Accessing The Admin Page</h2>
-            <p>Mention notification / subject / etc</p>
+            <ol>
+                <li>Open a web browser and navigate to the Admin Page URL.</li>
+                <li>Enter the <strong>Password</strong> <i>(Demo only)</i></li>
+            </ol>
+
+            <p><strong>Note:</strong> The admin page has only a password for demonstration purposes.
+            A finished application will require a username and password for each administrator. </p>
+
+            <p><strong>Admin Page URL:</strong> <a href="https://client-intake-mb0l.onrender.com/admin.html" 
+            target="_blank">https://client-intake-mb0l.onrender.com/admin.html</a></p>
         </section>
 
         <section id="finding-jobs">
             <h2>Finding Jobs</h2>
-            <p>Content Here</p>
-        </section>
+            <p>The default display settings for the admin page lists the 5 most recently added jobs in 
+                desccending order acccording to the creation date. There are multiple ways to search 
+                and sort existing jobs.</p>
+
+            <h3>Search jobs</h3>
+            <p>Search returns only the jobs that match the search criteria. Only 3 fields are searchable:</p>
+            <ul>
+                <li><strong>Business:</strong> The name of the business</li>
+                <li><strong>Contact:</strong> The name of the business contact</li>
+                <li><strong>Email: </strong> The email address of the business contact</li>
+            </ul>
+            <p>Type in your search criteria and click the <strong>Search</strong> button to search, or 
+            click the <strong>List All</strong> button to list all jobs. If more than 10 jobs are present,
+            only the first 10 jobs will be displayed per page. Use the <strong>Next</strong> and 
+            <strong>Previous</strong> buttons to navigate through the pages.</p>
+            <h3>Sort</h3>
+            <p>The <strong>Sort</strong> option allows admins to sort jobs according to the selected criteria.</p>
+            <ul>
+                <li><strong>Newist first:</strong> Most recently created jobs in descending order</li>
+                <li><strong>Oldest first:</strong> Created jobs in ascending order</li>
+                <li><strong>Company A-Z:</strong> Alphabetical order by business name</li>
+                <li><strong>Company Z-A:</strong> Reverse alphabetical order by business name</li>
+            </ul>
+
+            <h3>Status</h3>
+            <p>The <strong>Status</strong> filter allows admins to filter jobs according to the current status of
+            the project.</p>
+            <ul>
+                <li><strong>Any status <i>(Default)</i>:</strong> Displays all jobs regardless of status</li>
+                <li><strong>Received:</strong> Displays only jobs with a status of <strong>Received</strong></li>
+                <li><strong>Scheduling site visit:</strong> Displays only jobs with a status of <strong>Scheduling site visit</strong></li>
+                <li><strong>Estimate sent:</strong> Displays only jobs with a status of <strong>Estimate sent</strong></li>
+                <li><strong>Scheduled:</strong> Displays only jobs with a status of <strong>Scheduled</strong></li>
+                <li><strong>Declined:</strong> Displays only jobs with a status of <strong>Declined</strong></li>
+                <li><strong>In construction:</strong> Displays only jobs with a status of <strong>In construction</strong></li>
+                <li><strong>Completed:</strong> Displays only jobs with a status of <strong>Completed</strong></li>
+            </ul>
 
         <section id="managing-jobs">
             <h2>Managing Jobs</h2>
-            <p>Content Here</p>
+            <p>The primary purpose of the admin page is to track and manage jobs.</p>
+            <ul>
+                <li><strong>Status:</strong> Select the status from the drop down to move the project to the selected status</li>
+                <ul>
+                  <li><strong>Received:</strong> A newly received job that has not been updated</li>
+                  <li><strong>Scheduling site visit:</strong> A job for which a site visit is being scheduled</li>
+                  <li><strong>Estimate sent:</strong> A job for which an estimate has been sent</li>
+                  <li><strong>Scheduled:</strong> A job that has been scheduled</li>
+                  <li><strong>Declined:</strong> A job that has been declined</li>
+                  <li><strong>In construction:</strong> A job that is currently in progress</li>
+                  <li><strong>Completed:</strong> A job that has been completed</li>
+                </ul>                
+                <li><strong>Remove:</strong> Deletes the job from the form.  </li>
+                <ul>
+                  <li><strong>IMPORTANT:</strong> This action is permanent and cannot be undone.</li>
+                </ul>
+                <li><strong>Client Status page:</strong> Routes to the status page where clients view the project status </li>
+            </ul>
         </section>
 
         <section id="backup-and-restore">
             <h2>Backup and Restore</h2>
-            <p>Content Here</p>
-        </section>
-
-        <section id="Finding Jobs">
-            <h2>Finding Jobs</h2>
-            <p>Content Here</p>
+            <p>Backup and restore functionality is available for administrators to backup the database and restore it if
+            necessary. Backup files are CSV files that can be opened in Excel or other spreadsheet applications. 
+            The backup file contains all the data for the jobs in the database.</p>
+            <h4>Fields</h4>
+            <table>
+              <tr>
+                <th>Field</th>
+                <th>Description</th>
+                <th>Mandatory</th>
+                <th>Notes</th>
+              </tr>
+              <tr>
+                <td>id</td>
+                <td>The unique identifier for the job</td>
+                <td>Yes</td>
+                <td>Auto-generated by the system</td>
+              </tr>
+              <tr>
+                <td>name</td>
+                <td>The name of the business contact</td>
+                <td>Yes</td>
+                <td>Entered by the client in the intake form</td>
+              </tr>
+              <tr>                                      
+                <td>email</td>
+                <td>The email address of the business contact</td>
+                <td>Yes</td>
+                <td>Entered by the client in the intake form</td>
+              </tr>
+              <tr>
+                <td>notify_email</td>
+                <td>The email address to receive job notifications</td>
+                <td>No</td> 
+                <td>Entered by the client in the intake form</td>
+              </tr>
+              <tr>
+                <td>company</td>
+                <td>The name of the business</td>
+                <td>Yes</td>
+                <td>Entered by the client in the intake form</td>
+              </tr>
+              <tr>
+                <td>site</td>
+                <td>The job site address</td>
+                <td>No</td>
+                <td>Entered by the client in the intake form</td>
+              </tr>
+              <tr>
+                <td>project_type</td>
+                <td>The type of work requested</td>
+                <td>No</td>
+                <td>Entered by the client in the intake form</td>
+              </tr>
+                <tr>
+                    <td>square_footage</td>
+                    <td>The approximate size of the job site</td>
+                    <td>No</td>
+                    <td>Entered by the client in the intake form</td>
+                </tr>
+                <tr>
+                    <td>timeline</td>
+                    <td>The approximate start date range</td>
+                    <td>No</td>
+                    <td>Entered by the client in the intake form</td>
+                </tr>
+                <tr>
+                    <td>budget</td>
+                    <td>The approximate budget range</td>
+                    <td>No</td>
+                    <td>Entered by the client in the intake form</td>
+                </tr>
+                <tr>
+                    <td>message</td>
+                    <td>Additional details about the project</td>
+                    <td>No</td>
+                    <td>Entered by the client in the intake form</td>
+                </tr>
+                <tr>
+                    <td>status</td>
+                    <td>The current status of the project</td>
+                    <td>No</td>
+                    <td>Entered by the client in the intake form</td>
+                </tr>   
+                <tr>
+                    <td>created_at</td>
+                    <td>The date and time the job was created</td>
+                    <td>Yes</td>
+                    <td>Auto-generated by the system</td>
+                </tr>
+                <tr>
+                    <td>updated_at</td>
+                    <td>The date and time the job was last updated</td>
+                    <td>Yes</td>
+                    <td>Auto-generated by the system</td>
+                </tr>   
+            </table>
+            <ul>
+                <li><strong>id:</strong> The unique identifier for the job</li>
+                <li><strong>name:</strong> The name of the business contact</li>
+                <li><strong>email:</strong> The email address of the business contact</li>
+                <li><strong>notify_email:</strong> The email address to receive job notifications</li>
+                <li><strong>company:</strong> The name of the business</li>
+                <li><strong>site:</strong> The job site address</li>
+                <li><strong>project_type:</strong> The type of work requested</li>
+                <li><strong>square_footage:</strong> The approximate size of the job site</li>
+                <li><strong>timeline:</strong> The approximate start date range</li>
+                <li><strong>budget:</strong> The approximate budget range</li>
+                <li><strong>message:</strong> Additional details about the project</li>
+                <li><strong>status:</strong> The current status of the project</li>
+                <li><strong>created_at:</strong> The date and time the job was created</li>
+                <li><strong>updated_at:</strong> The date and time the job was last updated</li>
+            </ul>
+            <p>Add that IDs will be required in the future, but not for demo.</p>
         </section>
 
       <h1>Support</h1>
+        <section id="common-issues">
+            <h2>Common Issues</h2>
+            <p>Content Here</p>
+        </section>
         <section id="scope-of-support">
             <h2>Scope of Support</h2>
             <p>Content Here</p>
@@ -102,6 +320,11 @@
         <section id="contact-developer">
             <h2>Contact Developer</h2>
             <p>Content Here</p>
+        </section>
+
+        <section id="additional-features">
+            <h2>Additional Features</h2>
+            <p>Duplicate control, unsubscribe from emails, additional automations for job completion, etc.</p>
         </section>
     </main>
     </div>
