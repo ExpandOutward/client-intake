@@ -1,6 +1,6 @@
 const KEY_STORAGE = "admin-key";
 const PAGE_SIZE = 10;
-const RECENT_LIMIT = 2;
+const RECENT_LIMIT = 5;
 
 const loginForm = document.getElementById("login-form");
 const loginError = document.getElementById("login-error");

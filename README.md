@@ -75,7 +75,7 @@ Optional query params:
 - `status` — one of `received`, `reviewing`, `quoted`, `accepted`, `declined`, `in_progress`, `completed`
 - `limit` / `offset` — page size (max 100) and starting row
 
-The admin page loads the 2 newest jobs by default. Search and List All return 10 jobs per page.
+The admin page loads the 5 newest jobs by default. Search and List All return 10 jobs per page.
 
 ### `GET /api/requests/:id`
 
