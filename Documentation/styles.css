@@ -7,6 +7,8 @@
   --card: #f6f2ea;
   --line: #c3baab;
   --steel: #24282c;
+  --pill-bg: #efe0d0;
+  --ok-bg: #dde6d8;
   color-scheme: light;
 }
 
@@ -283,6 +285,47 @@ td:nth-child(3) {
 
 td:nth-child(4) {
   color: var(--muted);
+}
+
+.issue {
+  max-width: 44rem;
+  margin: 0 0 1rem;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 0.35rem;
+  box-shadow: 0 1px 0 rgba(26, 23, 20, 0.04);
+}
+
+.issue h5 {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  background: var(--pill-bg);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.issue p {
+  margin: 0;
+  padding: 0.85rem 0.9rem 0;
+}
+
+.issue p:last-child {
+  padding-bottom: 1rem;
+}
+
+.issue p:first-of-type::before,
+.issue p:last-of-type::before {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 @media (max-width: 720px) {

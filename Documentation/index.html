@@ -196,6 +196,16 @@
             <p>Backup and restore functionality is available for administrators to backup the database and restore it if
             necessary. Backup files are CSV files that can be opened in Excel or other spreadsheet applications. 
             The backup file contains all the data for the jobs in the database.</p>
+            <h3>Backup</h3>
+            <p>Clicking the <strong>Backup</strong> button will open a prompt, allowing you to select a location to
+            save your backup file. The file will save in a .csv format.</p>
+
+            <h3>Restore</h3>
+            <p><strong>IMPORTANT:</strong> Restoring a backup file will overwrite the current database with the data from 
+            the backup file. This action is permanent and cannot be undone.</p>
+
+            <p>Click the <strong>Restore</strong> button and locate a backup file to restore the database. Mandatory fields
+            must have a value.</p>
             <h4>Fields</h4>
             <div class="table-wrap">
             <table>
@@ -229,7 +239,7 @@
               <tr>
                 <td>notify_email</td>
                 <td>The email address to receive job notifications</td>
-                <td>No</td>
+                <td>Yes</td>
                 <td>Entered by the client in the intake form</td>
               </tr>
               <tr>
@@ -241,43 +251,43 @@
               <tr>
                 <td>site</td>
                 <td>The job site address</td>
-                <td>No</td>
+                <td>Yes</td>
                 <td>Entered by the client in the intake form</td>
               </tr>
               <tr>
                 <td>project_type</td>
                 <td>The type of work requested</td>
-                <td>No</td>
+                <td>Yes</td>
                 <td>Entered by the client in the intake form</td>
               </tr>
               <tr>
                 <td>square_footage</td>
                 <td>The approximate size of the job site</td>
-                <td>No</td>
+                <td>Yes</td>
                 <td>Entered by the client in the intake form</td>
               </tr>
               <tr>
                 <td>timeline</td>
                 <td>The approximate start date range</td>
-                <td>No</td>
+                <td>Yes</td>
                 <td>Entered by the client in the intake form</td>
               </tr>
               <tr>
                 <td>budget</td>
                 <td>The approximate budget range</td>
-                <td>No</td>
+                <td>Yes</td>
                 <td>Entered by the client in the intake form</td>
               </tr>
               <tr>
                 <td>message</td>
                 <td>Additional details about the project</td>
-                <td>No</td>
+                <td>Yes</td>
                 <td>Entered by the client in the intake form</td>
               </tr>
               <tr>
                 <td>status</td>
                 <td>The current status of the project</td>
-                <td>No</td>
+                <td>Yes</td>
                 <td>Entered by the client in the intake form</td>
               </tr>
               <tr>
@@ -295,42 +305,117 @@
               </tbody>
             </table>
             </div>
-            <ul>
-                <li><strong>id:</strong> The unique identifier for the job</li>
-                <li><strong>name:</strong> The name of the business contact</li>
-                <li><strong>email:</strong> The email address of the business contact</li>
-                <li><strong>notify_email:</strong> The email address to receive job notifications</li>
-                <li><strong>company:</strong> The name of the business</li>
-                <li><strong>site:</strong> The job site address</li>
-                <li><strong>project_type:</strong> The type of work requested</li>
-                <li><strong>square_footage:</strong> The approximate size of the job site</li>
-                <li><strong>timeline:</strong> The approximate start date range</li>
-                <li><strong>budget:</strong> The approximate budget range</li>
-                <li><strong>message:</strong> Additional details about the project</li>
-                <li><strong>status:</strong> The current status of the project</li>
-                <li><strong>created_at:</strong> The date and time the job was created</li>
-                <li><strong>updated_at:</strong> The date and time the job was last updated</li>
-            </ul>
-            <p>Add that IDs will be required in the future, but not for demo.</p>
+
+            <p><strong>Note:</strong> The above table is inaccurate regarding the demo version regarding required fields. 
+            Production versions will require all fields to have values as the business would only use imports to restore 
+            previoius backup files.  
+            </p>
         </section>
 
       <h1>Support</h1>
         <section id="common-issues">
             <h2>Common Issues</h2>
-            <p>Content Here</p>
+            <div class="issue">
+                <h5>Search does not return expected results</h5>
+                <p>When searching for a job that is known to exist, the search returns unexpected resutls or
+                    no results at all.
+                </p>
+                <p>
+                  <h5>Solution</h5>
+                  <p>Verify the following:
+                  <ul>
+                    <li>The record exists in the database (List All or check Backup File)</li>
+                    <li>You are searching by the correct field. (Business name, Contact name, or Email)</li>
+                    <li>You are searching for the correct value. (Check for typos)</li>
+                  </ul>
+                  </p>
+                  <p>
+                  If all of the above are true please contact the <a href="#contact-developer">Developer</a> with a detailed
+                  description of the issue.
+                </p>
+            </div>
+
+            <div class="issue">
+                <h5>Previous jobs have been removed after a backup restore</h5>
+                <p>Jobs that were present in the admin page before a restore are missing after the restore.  
+                </p>
+                  <h5>Solution</h5>
+                  <p>
+                    This is expected behavior. A restore completely overwrites the current database with whatever is contained 
+                    in the backup file. If you would like to keep jobs that have yet to have been backed up, please create a backup 
+                    before restoring the previous file. You can then copy the records from the new backup file to the file that you 
+                    would like to restore. Please contact the <a href="#contact-developer">Developer</a> if you need assistance with this process.
+                </p>
+            </div>
+
+            <div class="issue">
+                <h5>Clients receive duplicate status update emails</h5>
+                <p>A client received a status update email more than once for the same status change.
+                </p>
+                  <h5>Solution</h5>
+                <p>
+                  This is likely to occur if a backup is restored after a status change. If the job is updated after 
+                  the back up, the restore will revert the job status upon completion. Correcting the status will result 
+                  in another email notification being sent. If this was not the case, please contact the <a href="#contact-developer">Developer</a>.
+                </p>
+            </div>
         </section>
         <section id="scope-of-support">
             <h2>Scope of Support</h2>
-            <p>Content Here</p>
+            <p>Support scope widely depends on service contract <i>(ongoing, one-time, etc.)</i> and where the issue
+            occurs.</p>
+
+            <h3>Developer Responsibility</h3>
+            <p>Issues that occur within the application itself are the responsibility of the developer. This includes issues 
+               that occur due to direct changes to the application code, database, or server configuration. The developer is 
+                responsible for fixing any issues that arise from these changes at no cost to the client.</p>
+            <h4>Examples</h4>    
+            <ul>
+                <li>The import fails due to logic in the JavaScript code</li>
+                <li>Jobs fail to submit due to an issue in Render <i>(database backend)</i> or Make 
+                <i>(automation backend)</i></li>
+            </ul>
+            <h3>Business Responsibility</h3>
+            <p>Issues that occur due to actions made by the business are the responsibility of the business to resolve.
+               Involving the developer will require a fee unless the service contract includes support for these types of issues</p>
+            <h4>Examples</h4>
+            <ul>
+                <li>A business user inadvertently deletes important data requiring investigation for a potential restore</li>
+                <li>A business user imports an incorrect file and assistance is required in resolving the issue</li>
+            </ul>
+            <h3>Third Party Responsibility</h3>
+            <p>Issues that occur due to third party services are the responsibility are out of the control of both the business 
+               and the developer. Developer fees may or may not be required depending on the issue.</p>
+            <h4>Examples</h4>
+            <ul>            
+                <li>Render <i>(database backend)</i> or Make <i>(automation backend)</i> is down and the application is not 
+                functioning properly</li>
+                <li>Render or Make pushes aconfiguration change that breaks the application</li>
+            </ul> 
         </section>
         <section id="contact-developer">
             <h2>Contact Developer</h2>
-            <p>Content Here</p>
+            <p>Contact the developer for any issues related to the application code, database, or server configuration.</p>
+            <p><strong>Developer Email:</strong> <a href="mailto:'kenjsdev@pm.me'"">kenjsdev@pm.me</a></p>   
+            <p><strong>Developer Phone:</strong> <a href="tel:+0-000-000-0000">+0 (000) 000-0000</a></p>
         </section>
 
         <section id="additional-features">
             <h2>Additional Features</h2>
-            <p>Duplicate control, unsubscribe from emails, additional automations for job completion, etc.</p>
+            <p>This is a demo application and therefore I have left out features and functionalities that would 
+               typically be requested or included in a business application</p>
+            <h4>Examples</h4>
+            <ul>
+                <li><strong>Duplicate control:</strong> A queue can be added for newly submitted items that compares them against
+                one another to block dupliate entries, spam, and trolling efforts</li>
+                <li><strong>Unsubscribe from emails:</strong> Users can opt out of receiving email notifications</li>
+                <li><strong>Create and update for import:</strong> Users can select <strong>Create</strong> or <strong>Update</strong> 
+                options during the import process, enabling users to create jobs via import
+                </li>
+                <li><strong>Automated backups:</strong> Regular automated backups can be scheduled to ensure data safety</li>
+                <li><strong>Notification confirmation:</strong> Business users can confirm whether or not to send a notification upon a 
+                status update</li>
+            </ul>
         </section>
     </main>
     </div>
