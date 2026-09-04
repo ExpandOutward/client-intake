@@ -2,11 +2,16 @@ const navLinks = [...document.querySelectorAll("nav a")];
 const sections = [...document.querySelectorAll("main section[id]")];
 const scroller = document.querySelector("main");
 
-function setActive(id) {
+function setActive(id, { reveal = false } = {}) {
   navLinks.forEach((link) => {
     const href = link.getAttribute("href") || "";
     const hash = href.startsWith("#") ? href.slice(1) : "";
-    link.classList.toggle("is-active", Boolean(id) && hash === id);
+    const isActive = Boolean(id) && hash === id;
+    link.classList.toggle("is-active", isActive);
+    if (isActive && reveal) {
+      const group = link.closest("details");
+      if (group) group.open = true;
+    }
   });
 }
 
@@ -14,7 +19,7 @@ function scrollToId(id) {
   const target = document.getElementById(id);
   if (!target) return;
   target.scrollIntoView({ behavior: "smooth", block: "start" });
-  setActive(id);
+  setActive(id, { reveal: true });
 }
 
 navLinks.forEach((link) => {

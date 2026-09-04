@@ -22,28 +22,39 @@
 
     <div class="wiki">
     <nav>
-        <h4 href="#client">Client</h4>
-        <ul>
-            <li><a href="#accessing-the-system">Accessing The System</a></li>
-            <li><a href="#completing-the-form">Completing The Form</a></li>
-            <li><a href="#submitting-the-form">Submitting The Form</a></li>
-            <li><a href="#receiving-updates">Receiving Updates</a></li>
-        </ul>
-        <h4 href="#administrator">Administrator</h4>
-        <ul>
-            <li><a href="#accessing-the-admin-page">Accessing The Admin Page</a></li>
-            <li><a href="#finding-jobs">Finding Jobs</a></li>
-            <li><a href="#managing-jobs">Managing Jobs</a></li>
-            <li><a href="#backup-and-restore">Backup and Restore</a></li>
-        </ul>
-        <h4 href="#support">Support</h4>
-        <ul>
-            <li><a href="#common-issues">Common Issues</a></li>
-            <li><a href="#scope-of-support">Scope of Support</a></li>
-            <li><a href="#contact-developer">Contact Developer</a></li>
-            <li><a href="#additional-features">Additional Features</a></li>
-        </ul>
-
+        <details open>
+            <summary>
+                <h4>Client</h4>
+            </summary>
+            <ul>
+                <li><a href="#accessing-the-system">Accessing The System</a></li>
+                <li><a href="#completing-the-form">Completing The Form</a></li>
+                <li><a href="#submitting-the-form">Submitting The Form</a></li>
+                <li><a href="#receiving-updates">Receiving Updates</a></li>
+            </ul>
+        </details>
+        <details open>
+            <summary>
+                <h4>Administrator</h4>
+            </summary>
+            <ul>
+                <li><a href="#accessing-the-admin-page">Accessing The Admin Page</a></li>
+                <li><a href="#finding-jobs">Finding Jobs</a></li>
+                <li><a href="#managing-jobs">Managing Jobs</a></li>
+                <li><a href="#backup-and-restore">Backup and Restore</a></li>
+            </ul>
+        </details>
+        <details open>
+            <summary>
+                <h4>Support</h4>
+            </summary>
+            <ul>
+                <li><a href="#common-issues">Common Issues</a></li>
+                <li><a href="#scope-of-support">Scope of Support</a></li>
+                <li><a href="#contact-developer">Contact Developer</a></li>
+                <li><a href="#additional-features">Additional Features</a></li>
+            </ul>
+        </details>
     </nav>
 
     <main>
@@ -315,50 +326,54 @@
       <h1>Support</h1>
         <section id="common-issues">
             <h2>Common Issues</h2>
-            <div class="issue">
-                <h5>Search does not return expected results</h5>
+            <details class="issue" open>
+                <summary>
+                    <h5>Search does not return expected results</h5>
+                </summary>
                 <p>When searching for a job that is known to exist, the search returns unexpected resutls or
                     no results at all.
                 </p>
-                <p>
-                  <h5>Solution</h5>
-                  <p>Verify the following:
-                  <ul>
+                <h5>Solution</h5>
+                <p>Verify the following:</p>
+                <ul>
                     <li>The record exists in the database (List All or check Backup File)</li>
                     <li>You are searching by the correct field. (Business name, Contact name, or Email)</li>
                     <li>You are searching for the correct value. (Check for typos)</li>
-                  </ul>
-                  </p>
-                  <p>
+                </ul>
+                <p>
                   If all of the above are true please contact the <a href="#contact-developer">Developer</a> with a detailed
                   description of the issue.
                 </p>
-            </div>
+            </details>
 
-            <div class="issue">
-                <h5>Previous jobs have been removed after a backup restore</h5>
+            <details class="issue" open>
+                <summary>
+                    <h5>Previous jobs have been removed after a backup restore</h5>
+                </summary>
                 <p>Jobs that were present in the admin page before a restore are missing after the restore.  
                 </p>
-                  <h5>Solution</h5>
-                  <p>
+                <h5>Solution</h5>
+                <p>
                     This is expected behavior. A restore completely overwrites the current database with whatever is contained 
                     in the backup file. If you would like to keep jobs that have yet to have been backed up, please create a backup 
                     before restoring the previous file. You can then copy the records from the new backup file to the file that you 
                     would like to restore. Please contact the <a href="#contact-developer">Developer</a> if you need assistance with this process.
                 </p>
-            </div>
+            </details>
 
-            <div class="issue">
-                <h5>Clients receive duplicate status update emails</h5>
+            <details class="issue" open>
+                <summary>
+                    <h5>Clients receive duplicate status update emails</h5>
+                </summary>
                 <p>A client received a status update email more than once for the same status change.
                 </p>
-                  <h5>Solution</h5>
+                <h5>Solution</h5>
                 <p>
                   This is likely to occur if a backup is restored after a status change. If the job is updated after 
                   the back up, the restore will revert the job status upon completion. Correcting the status will result 
                   in another email notification being sent. If this was not the case, please contact the <a href="#contact-developer">Developer</a>.
                 </p>
-            </div>
+            </details>
         </section>
         <section id="scope-of-support">
             <h2>Scope of Support</h2>

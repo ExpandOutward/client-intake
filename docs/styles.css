@@ -115,17 +115,63 @@ nav {
   color: #fff;
 }
 
-nav h4 {
-  margin: 1.25rem 1.1rem 0.45rem;
+nav details {
+  margin: 0;
+}
+
+nav summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0.45rem;
+  padding: 0.35rem 1.1rem;
   color: #e8c39e;
+  cursor: pointer;
+  list-style: none;
+}
+
+nav details:first-child summary {
+  margin-top: 0.25rem;
+}
+
+nav summary::-webkit-details-marker,
+nav summary::marker {
+  display: none;
+  content: "";
+}
+
+nav summary h4 {
+  margin: 0;
+  color: inherit;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-nav h4:first-child {
-  margin-top: 0.25rem;
+nav summary::after {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+nav details:not([open]) summary::after {
+  transform: rotate(-45deg);
+}
+
+nav summary:hover,
+nav summary:focus-visible {
+  background: var(--accent-hover);
+}
+
+nav summary:focus-visible {
+  outline: 2px solid #e8c39e;
+  outline-offset: -2px;
 }
 
 nav ul {
@@ -297,6 +343,49 @@ td:nth-child(4) {
   box-shadow: 0 1px 0 rgba(26, 23, 20, 0.04);
 }
 
+.issue > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-right: 0.9rem;
+  background: var(--pill-bg);
+  color: var(--accent);
+  cursor: pointer;
+  list-style: none;
+}
+
+.issue > summary::-webkit-details-marker,
+.issue > summary::marker {
+  display: none;
+  content: "";
+}
+
+.issue > summary::after {
+  content: "";
+  flex-shrink: 0;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+.issue:not([open]) > summary::after {
+  transform: rotate(-45deg);
+}
+
+.issue > summary:hover,
+.issue > summary:focus-visible {
+  background: #e4d0b8;
+}
+
+.issue > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .issue h5 {
   margin: 0;
   padding: 0.7rem 0.9rem;
@@ -308,9 +397,20 @@ td:nth-child(4) {
   text-transform: uppercase;
 }
 
+.issue > summary h5 {
+  flex: 1;
+  background: transparent;
+}
+
 .issue p {
   margin: 0;
   padding: 0.85rem 0.9rem 0;
+}
+
+.issue ul,
+.issue ol {
+  margin: 0.35rem 0 0.5rem;
+  padding: 0 0.9rem 0 2.15rem;
 }
 
 .issue p:last-child {
@@ -335,6 +435,20 @@ td:nth-child(4) {
   }
 
   nav {
-    max-height: 40vh;
+    max-height: 25vh;
+    padding: 0.5rem 0 0.65rem;
+  }
+
+  nav summary {
+    margin: 0.55rem 0 0.2rem;
+    padding: 0.3rem 1.1rem;
+  }
+
+  nav details:first-child summary {
+    margin-top: 0.1rem;
+  }
+
+  nav a {
+    padding: 0.35rem 1.1rem;
   }
 }
